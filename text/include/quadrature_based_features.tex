@@ -1,71 +1,71 @@
 \chapter{Large-Scale Kernel Methods for Unstructured Datasets}
 \label{chap:unstructured_datasets}
-In vast majority of real-world problems the data sets do not have the factorial structure.
-In this case the are several approaches to scale up the GP model.
-One way is to aggregate several smaller models into big one,
-e.g. Mixture of GPs and Bayesian Machine Committee
+In the vast majority of real-world problems data sets do not have the factorial structure.
+In this case, there are several approaches to scale up the GP model.
+One is to aggregate several smaller models into a big one,
+e.g., Mixture GPs or Bayesian machine committee
 \citep{rasmussen2006gaussian, rasmussen2001infinite}.
-The idea here is to split data set into several smaller subsets
+The idea here is to split data set into several small subsets
 $\mathcal{D}_i, i=1, \ldots, M$, build on each data set GP model and then combine them.
-In Bayesian committee machine, for example, the final distribution is given by
+For instance, in the Bayesian committee machine, the final distribution is given by
 \[
     p(y^* | \mathcal{D}) \sim \frac{\prod_{i=1}^M p(y^* | \mathcal{D}_i)}{p(y^*)},
 \]
-supposeing that the correlation between subsets is small.
+assuming that the correlation between the subsets is small.
 
-Another class of methods builds lightweight approximation of the kernel function.
-There are data dependent approaches that follow Nystr{\"o}m's method for kernel approximation
+Another class of methods builds a lightweight approximation of the kernel function.
+There are also data-dependent approaches that follow Nystr{\"o}m's method for kernel approximation
 \citep{rasmussen2006gaussian}.
-The idea of approximation is based on numerical approximation of the {\em eigenfunctions}
+The idea of approximation is based on the numerical approximation of the {\em eigenfunctions}
 and {\em eigenvalues} of the kernel function.
 A function $\phi(\cdot)$ that satisfies the following equation
 \[
     \int k(\mathbf{x, x}')\phi(\mathbf{x}) d\mu(\mathbf{x}) = \lambda \phi(\mathbf{x}')
 \]
-is called eigenfunction of kernel $k$, $\lambda$ is a corresponding eigenvalue
+is called the eigenfunction of kernel $k$, where $\lambda$ is a corresponding eigenvalue
 with respect to measure $\mu$.
-If we let $d\mu(\mathbf{x}) = p(\mathbf{x})d\mathbf{x}$ we can write down
+If we let consider $d\mu(\mathbf{x}) = p(\mathbf{x})d\mathbf{x}$, we can write the
 numerical approximation to the equation
 \begin{equation}
 \label{eq:eigenfunction_approx}
     \lambda_i \phi_i(\mathbf{x}) \simeq
     \frac{1}{M} \sum_{k=1}^M k(\mathbf{x}_k, \mathbf{x}) \phi_i(\mathbf{x}_k),
 \end{equation}
-where points $\mathbf{x}_k$ are generated from distribution $p(\mathbf{x})$
-and called {\em inducing points}.
+where points $\mathbf{x}_k$, generated from distribution $p(\mathbf{x})$,
+are called {\em inducing points}.
 By plugging $\mathbf{x}_i$ from the training set into equation above we obtain
 \[
     \mathbf{K}_f \mathbf{u}_i = \hat{\lambda}_i \mathbf{u}_i,
     \quad
     \phi_i(\mathbf{x}_j) = \sqrt{\hat{\lambda}_i} \left ( \mathbf{u}_i \right )_j.
 \]
-And now from \eqref{eq:eigenfunction_approx} we obtain {\em Nystr{\"o}m} approximation
-of the $i$-th eigenfunction $\phi(\mathbf{x}) = \frac{M}{\hat{\lambda}_i}\mathbf{k}^\T \mathbf{u}_i$, and, therefore, approximation of the kernel matrix
+Then from \eqref{eq:eigenfunction_approx}, we obtain the {\em Nystr{\"o}m} approximation
+of the $i$-th eigenfunction $\phi(\mathbf{x}) = \frac{M}{\hat{\lambda}_i}\mathbf{k}^\T \mathbf{u}_i$, and, therefore, the approximation of the kernel matrix:
 \begin{equation}
 \label{eq:nystrom_matrix}
     \mathbf{K}_f \simeq \widehat{\mathbf{K}}_f = \mathbf{K}_{NM}\mathbf{K}_{MM}^{-1}\mathbf{K}_{MN},
 \end{equation}
 where $\mathbf{K}_{MN}$ is a covariance matrix between training points and inducing points
-and $\mathbf{K}_{MM}$ is a covariance between inducing points.
+while $\mathbf{K}_{MM}$ is a covariance matrix between inducing points.
 More details can be found in \citep{rasmussen2006gaussian}.
 
-In \citep{williams2001using} the authors first proposed to use
-\eqref{eq:nystrom_matrix} approximation in posterior distribution of GP regression model.
-The computational complexity is reduced to $\mathcal{O}(NM^2 + M^3)$ operations
-which gives benefit if $M \ll N$.
-There are several works that build on top of Nystr{\"o}m approximation trying to refine
-the approximation of the covariance matrix and, thus, improve the quality of the model
+In \citep{williams2001using}, the authors first proposed to use the
+\eqref{eq:nystrom_matrix} approximation in the posterior distribution of the GP regression model.
+The computational complexity is reduced to $\mathcal{O}(NM^2 + M^3)$ operations,
+which is beneficial if $M \ll N$.
+There are several works that build on the Nystr{\"o}m approximation, trying to refine
+the approximation of the covariance matrix and thus improve the quality of the model
 while preserving low computational complexity \citep{quinonero2005unifying, rossi2020sparse}.
 
-In this thesis we consider different type of approximations based on so called
-{\em random features}.
-The idea of the approach is to construct approximation of the kernel function
-that enables low-rank approximation of the kernel matrix.
-To construct such approximation we need to consider the kernel function from different
+In this thesis, we consider different types of approximations based on so-called
+random features.
+The idea of the approach is to construct an approximation of the kernel function
+that enables a low-rank approximation of the kernel matrix.
+To construct such an approximation, we need to consider the kernel function from a different
 perspective.
 It turns out that every positive definite kernel $k$ uniquely defines some space of functions
 and vice versa.
-Moreover, it can be seen as an inner products in an appropriate Hilbert space.
+Moreover, it can be seen as an inner product in an appropriate Hilbert space.
 
 \begin{definition}[Positive definite kernels]
     Let $\mathcal{X}$ be a nonempty set.
@@ -77,13 +77,13 @@ Moreover, it can be seen as an inner products in an appropriate Hilbert space.
     \]
 \end{definition}
 
-Note, that the covariance function that we use in GP are also positive definite kernels.
+Note that the covariance functions that we use in GP are also positive definite kernels.
 
 \begin{definition}[RKHS, \citep{aronszajn1950theory}]
 Let $\mathcal{X}$ be a nonempty set and $k$ be a positive definite kernel on $\mathcal{X}$.
 A Hilbert space $\mathcal{H}$ of function on $\mathcal{X}$ with an inner-product
 $\langle \cdot, \cdot \rangle_{\mathcal{H}}$ is called a reproducing kernel
-Hilbert space (RKHS) with reproducing kernel $k$, if the following is satisfied
+Hilbert space (RKHS) with reproducing kernel $k$, if the following is satisfied:
     \begin{enumerate}
         \item For all $\mathbf{x} \in \mathcal{X}$ we have
         $k(\cdot, \mathbf{x}) \in \mathcal{H}$;
@@ -94,7 +94,7 @@ Hilbert space (RKHS) with reproducing kernel $k$, if the following is satisfied
         \]
     \end{enumerate}
 \end{definition}
-In reproducing property we used $k(\cdot, \mathbf{x})$ which is actually
+In the reproducing property, we used $k(\cdot, \mathbf{x})$, which is actually
 a real-valued function such that $\mathbf{y} \rightarrow k(\mathbf{y, x})$
 for $\forall \mathbf{y} \in \mathcal{X}$.
 So, the kernel function satisfies
@@ -102,21 +102,21 @@ So, the kernel function satisfies
     k(\mathbf{x, y}) = \langle k(\cdot, \mathbf{x}), k(\cdot, \mathbf{y}) \rangle,
     \quad \mathbf{x, y} \in \mathcal{X}.
 \]
-$k(\cdot, \mathbf{x})$ is called {\em canonical feature map} of $\mathbf{x}$.
+where $k(\cdot, \mathbf{x})$ is the {\em canonical feature map} of $\mathbf{x}$.
 There can be a lot of different features maps
-$\psi \colon \mathcal{X} \rightarrow \mathcal{H}$ such that their inner product is defined
+$\psi \colon \mathcal{X} \rightarrow \mathcal{H}$, such that their inner product is defined
 by the kernel function $k(\mathbf{x, y}) = \langle \psi(\mathbf{x}), \psi(\mathbf{y})$.
 
-The idea for kernel approximation using randomized feature map is based
-on finding finite-dimensional maps that approximate the inner-product that is associated
+The idea for kernel approximation using randomized feature maps is based
+on finding finite-dimensional maps that approximate the inner product associated
 with the kernel function.
 
-The main contributions of this chapter are as follows.
+The main contributions of this chapter are as follows:
 \begin{itemize}
-    \item We introduce a technique for kernel approximation based on randomzied feature maps
+    \item Introducing a technique for kernel approximation based on randomized feature maps
     and special quadrature rules.
-    \item We derive error bounds for the developed approach.
-    \item We show that \citep{rahimi2008random,felix2016orthogonal} are special cases of the
+    \item Deriving error bounds for the developed approach.
+    \item Showing that \citep{rahimi2008random,felix2016orthogonal} are special cases of the
     proposed method.
 \end{itemize}
 

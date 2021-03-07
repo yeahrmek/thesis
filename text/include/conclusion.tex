@@ -1,51 +1,51 @@
 \chapter{Conclusion}
 \label{sec:conclusion}
 
-This thesis contributes to the Gaussian Process models and kernel methods
+This thesis contributes to the Gaussian process models and kernel methods
 as well as different machine learning techniques.
 
 In Chapter~\ref{chap:gp_on_grids}, we considered regression problems
-where the data set has either a full-factorial or an incomplete factorial
+where the data set has either the full or incomplete factorial
 design of experiments.
-Using the special structure of the data set, we developed
-a computationally efficient technique for the exact inference of the GP model.
+Using the special data set's structure, we developed
+a computationally efficient technique for drawing the exact inference of the GP model.
 We also provided a special regularization for such cases
 that allows the avoidance of the degeneration of the model and improves the overall quality.
-The experimental section in this chapter demonstrates
-the good performance of the approach and justifies low computational complexity.
+Lastly, the experimental section in this chapter demonstrated
+the good performance of the approach and justified low computational complexity.
 
-Chapter~\ref{chap:unstructured_datasets} develops a general method
-for an approximation of the kernel function based on randomized feature maps.
-We propose a quadrature-based approach to building such feature maps
-allowing us to obtain a low approximation error with a small number of features
-and, thus, reduceing the computational complexity.
-The theoretical analysis provides error bounds for the developed technique.
-The experiments confirm the superiority of the method compared to other
-random features-based approaches.
+Chapter~\ref{chap:unstructured_datasets} developed a general method
+for approximating the kernel function based on randomized feature maps.
+For this, we proposed a quadrature-based approach to build such feature maps, which
+allowed us to obtain a low approximation error with a small number of features
+thus reducing the computational complexity.
+In addition, the theoretical analysis provided error bounds for the developed technique.
+The subsequent experiments showed the superiority of the method compared with other
+random feature-based approaches.
 
-Chapter~\ref{chap:applications} is dedicated to applications of the developed methods.
-We consider three different problems: tensor completion, probability density estimate
+Chapter~\ref{chap:applications} is dedicated to applications of the developed methods, which
+considered three different problems: tensor completion, probability density estimate,
 and simultaneous localization and mapping.
 For the tensor completion problem, we developed an initialization scheme based on the
 GP model.
-We suppose that the function that generates tensor values is smooth and
-model it by combining the GP model with a tensor-train based approximation method.
+We supposed that the function that generates tensor values is smooth and hence
+modelled it by combining the GP model with the tensor-train-based approximation method.
 As a result, we developed a general tensor completion approach.
-The experiments proved that the proposed initialization improves the overall quality.
+The subsequent experiments showed that the proposed initialization improves the overall quality.
 
 We also applied the random features approach to the density estimate problem.
-In this case we derived an analytical solution for the denoising score matching loss
+In this case, we derived an analytical solution for the denoising score matching loss,
 which was impossible to derive using the exact GP model or Nystr{\"o}m-type approximations.
-The resulting model has natural additional regularization.
-The performance is also improved compared to the Nystr{\"o}m-based models.
+Therefore, the resulting model has natural additional regularization.
+The performance also improved compared with the Nystr{\"o}m-based models.
 
 Finally, the developed large-scale GP models allowed to re-utilize it
 in simultaneous localization and mapping problems.
-In robotics, they use state-space formulation of the GP model and a restricted
-class of kernel functions that give a high computational performance.
-With the proposed approach, we keep low computational complexity
-but also enjoy the advantages of a broader class of kernel that we can apply.
-We demonstrate that it can improve the quality of the estimates in some cases,
+In robotics, the state-space formulation of the GP model and a restricted
+class of kernel functions that give a high computational performance are used.
+With the proposed approach, we not only kept a low computational complexity
+but also enjoyed the advantages of a broader class of kernel that we can could apply.
+Moreover, we demonstrated that it can improve the quality of the estimates in some cases,
 especially when there is a considerable amount of noise in observations.
 
 
@@ -55,46 +55,46 @@ especially when there is a considerable amount of noise in observations.
 
 Currently, deep neural networks outperform other techniques in many
 problems.
-Interestengly, there is a connection between neural networks
+Interestingly, there is a connection between neural networks
 and kernel methods.
-One of the first work in this direction is \citep{williams1996computing} which
-showed that single-layer network with infinite number of neurons is equivalent
-to Gaussian Process.
+One of the first works in this direction was \citep{williams1996computing}, which
+showed that a single-layer network with infinite neurons is equivalent
+to the Gaussian process.
 More modern works \citep{lee2017deep,jacot2018neural} show the connection
-between deeper neural networks with Gaussian Processes and kernels.
-The work \citep{daniely2017sgd} studies the behaviour of the
-neural network with all the weight random except the last one which
+between deeper neural networks, Gaussian processes and kernels.
+The work \citep{daniely2017sgd} studies the behaviour of
+neural networks with all the weight randomized except the last one, which
 is learnt using SGD.
-This can be seen as random feature model.
+This can be seen as a random feature model.
 
-In light of the mentioned works it is interesting to study how the properties
+In light of the mentioned works, it is interesting to study how the properties
 of random feature models (and kernels) can be transferred
 to deep neural networks in practice.
-For example, double descent phenomenon is encountered in over-parameterized
-neural networks.
-However, in some architectures it is impossible to observe it \citep{ba2019generalization},
-while in random feature models it seems to be more robust \citep{mei2019generalization}.
-So, the question is whether random features idea could help to develop
-over-parameterized architectures with better double descent guarantees.
+For example, the double descent phenomenon is encountered in over-parameterized
+neural networks;
+although in some architectures, it is impossible to observe it \citep{ba2019generalization},
+in random feature models, it seems to be more robust \citep{mei2019generalization}.
+Therefore, the question is whether the random features idea could help develop
+over-parameterized architectures with better double-descent guarantees.
 
-Also it is interesting to study whether random feature models can be helpful
+It is also interesting to study whether random feature models can be helpful
 in neural network compression.
-In paper \citep{frankle2018lottery} the authors introduced Lottery Ticket Hypothesis
-which states that a network contains smaller sub-network that can achieve
-the same performance as the whole network when trained in isolation.
-In context of the hypothesis shallow neural sub-networks are equivalent
+In the paper \citep{frankle2018lottery}, the authors introduce the Lottery Ticket Hypothesis,
+which states that a network contains a smaller sub-network, which can achieve
+the same performance as a whole network when trained in isolation.
+In context of the hypothesis, shallow neural sub-networks are equivalent
 to random feature models \citep{malach2020proving}.
-So, further studying this connection and finding a way to apply
-random features idea to compress neural network may be a promising
+Thus, further studying this connection and finding a way to apply
+the random features idea to compress neural networks might be a promising
 research direction.
 
-Finally, I believe that in existing pipelines there are parts that
+Finally, I believe that in the existing pipelines, there are parts that
 can be efficiently approximated using randomized maps.
-For example, in recent work \citep{choromanski2020rethinking} they applied
-random features approach to approximate attention mechanism.
-Also, it can be fruitful to replace some traidtional layers or computations
-by a more complicated kernel version and then reduce the complexity
-using some kind of approximation.
+For example, in the recent work \citep{choromanski2020rethinking}, they applied
+the random features approach to approximate an attention mechanism.
+Also, replacing some traditional layers or computations
+with a more complicated kernel version and then reducing the complexity
+using some kind of approximation could yield results.
 
 
 

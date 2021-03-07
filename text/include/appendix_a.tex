@@ -1,4 +1,4 @@
-\chapter{Additional results for Quadrature-based features}
+\chapter{Additional results for quadrature-based features}
 
 \section{Proof of Proposition 3.6}
 \subsection{Variance of the degree $(3, 3)$ quadrature rule}
@@ -6,7 +6,7 @@ Let us denote $\mathbf{q} = \begin{pmatrix} \mathbf{x}\\ \mathbf{y} \end{pmatrix
 $k(\mathbf{q}) = k(\mathbf{x}, \mathbf{y})$,
 $h_j(\mathbf{q}) = d \frac{f_{\mathbf{xy}}(-\rho_j \mathbf{Qv}_j) + f_{\mathbf{xy}}(\rho_j \mathbf{Qv}_j)}{2 \rho_j^2} - k(\mathbf{q}) =
 s_j(\mathbf{q}) - k(\mathbf{q})$.
-Then it is easy to see that $\mathbb{E}h_j(\mathbf{q}) = 0$.
+Then, it is easy to see that $\mathbb{E}h_j(\mathbf{q}) = 0$.
 
 Let us denote $I(\mathbf{q}) = SR^{3, 3}_{\mathbf{Q}_1,\rho_1}(f_{\mathbf{xy}})$,
 $g(\mathbf{q}) = I(\mathbf{q}) - k(\mathbf{x}, \mathbf{y})$.
@@ -36,7 +36,7 @@ Variance of the second term (using independence of $h_i(\mathbf{q})$ and $h_j(\m
 \frac{1}{(d + 1)^2} \sum_{i = 1} \mathbf{E} h_i(\mathbf{q})^2 = \frac{\mathbf{E}h_1(\mathbf{q})^2 }{d + 1}.
 \end{align}
 %%%%%%%%%%%%%
-Variance of the last term (using Cauchy-Schwarz inequality)
+Variance of the last term (using the Cauchy-Schwarz inequality)
 \begin{align}
 \label{eq:variance_2_third_term}
 cov \left ( 1 - \sum_{j = 1}^{d + 1}\frac{d}{(d + 1)\rho_j^2}, \frac{1}{d + 1} \sum_{i = 1}^{d + 1} h_i(\mathbf{q})\right) & =
@@ -52,7 +52,7 @@ Now, let us upper bound term $\mathbb{E}h_1(\mathbf{q})^2$
 - k(\mathbf{q})^2 \le \frac{d \kappa^4}{d - 2}.
 \]
 Using this expression and plugging \eqref{eq:variance_2_first_term}, \eqref{eq:variance_2_second_term}, \eqref{eq:variance_2_third_term}
-into \eqref{eq:variance_2_full} we obtain
+into \eqref{eq:variance_2_full}, we obtain
 \begin{align}
 \label{eq:variance_2_upper_bound}
 \mathbb{V} \left [
@@ -60,30 +60,30 @@ into \eqref{eq:variance_2_full} we obtain
 \right ] &\le \frac{2}{n(d + 1)(d - 2)} + \frac{d\kappa^4}{n(d + 1)(d - 2)} +
 \frac{1}{n}\sqrt{\frac{d\kappa^4}{d(d - 2)^2}} \le \nonumber \\
 &\le \frac{2}{n(d + 1)(d - 2)} + \frac{d\kappa^4}{n(d + 1)(d - 2)} +
-\frac{\kappa^2}{n(d - 2)} \le \frac{2 + \kappa^4 + \kappa^2}{n(d - 2)}.
+\frac{\kappa^2}{n(d - 2)} \le \frac{2 + \kappa^4 + \kappa^2}{n(d - 2)},
 \end{align}
-and it concludes the proof.
+thereby concluding the proof.
 
 \subsection{Error probability}
-The proof strategy closely follows that of \citep{sutherland2015error}; we just use Chebyshev-Cantelli ineqaulity
-instead of Hoeffding's and Bernstein inequalities and all the expectations are calculated according to our quadrature rules.
+The proof strategy closely follows that of \citep{sutherland2015error}; we use the Chebyshev-Cantelli inequality
+instead of Hoeffding's and Bernstein inequalities and then calculate all the expectations according to our quadrature rules.
 
 Let $\mathbf{q} = \begin{pmatrix} \mathbf{x} \\ \mathbf{y} \end{pmatrix} \in \mathcal{X}^2$,
-$\mathcal{X}^2$ is compact set in $\mathbb{R}^{2d}$ with diameter $\sqrt{2}l$, so we can cover it with an
-$\varepsilon$-net using at most $T = (2\sqrt{2}l/r)^{2d}$ balls of radius $r$.
+where $\mathcal{X}^2$ is a compact set in $\mathbb{R}^{2d}$ with diameter $\sqrt{2}l$, so we can cover it with an
+$\varepsilon$-net using $T = (2\sqrt{2}l/r)^{2d}$ balls of radius $r$ at most.
 Let $\{\mathbf{q}_i\}_{i=1}^T$ denote their centers, and $L_g$ be the Lipschitz constant of $g(\mathbf{q}): \mathbb{R}^{2d} \rightarrow \mathbb{R}$.
 If $|g(\mathbf{q}_i)| < \varepsilon / 2$ for all $i$ and $L_g < \varepsilon / (2r)$, then $g(\mathbf{q}) < \varepsilon$ for all
 $\mathbf{q} \in \mathcal{X}^2$.
 
-\subsubsection{Regularity Condition}
-Similarly to \citep{sutherland2015error} (regularity condition section in appendix) it can be proven
+\subsubsection{Regularity condition}
+Similar to \citep{sutherland2015error} (regularity condition section in appendix), it can be proven
 that $\mathbb{E}\nabla g(\mathbf{q}) = \nabla \mathbb{E}g(\mathbf{q})$.
 
-\subsubsection{Lipschitz Constant}
+\subsubsection{Lipschitz constant}
 Since $g$ is differentiable, $L_g = \|\nabla g(\mathbf{q}^*) \|$,
 where $\mathbf{q}^* = \arg\max_{\mathbf{q} \in \mathcal{X}^2}\|\nabla g(\mathbf{q})\|$.
-Via Jensen's inequality ${\mathbb{E}\|\nabla h(\mathbf{q})\| \geq \|\mathbb{E} \nabla h(\mathbf{q})\|}$.
-Then using independence of $h_i(\mathbf{q})$ and $h_j(\mathbf{q})$ for $i \neq j$
+Via Jensen's inequality, ${\mathbb{E}\|\nabla h(\mathbf{q})\| \geq \|\mathbb{E} \nabla h(\mathbf{q})\|}$.
+Then, using the independence of $h_i(\mathbf{q})$ and $h_j(\mathbf{q})$ for $i \neq j$
 \begin{align*}
 \mathbb{E}[L_g]^2 & = \mathbb{E} \left [ \|\nabla I(\mathbf{q^*}) - k(\mathbf{q}^*) \|^2\right ] =
 \mathbb{E} \left [ \left \|\frac{1}{d + 1} \sum_{i = 1}^{d + 1} \nabla h_i(\mathbf{q}^*)\right \|^2 \right] =
@@ -96,7 +96,7 @@ Then using independence of $h_i(\mathbf{q})$ and $h_j(\mathbf{q})$ for $i \neq j
 \frac{2d^2 \kappa^2 \mu^2 \sigma_p^2}{d + 1} \mathbb{E}\frac{1}{\rho_1^2} = \frac{2d \kappa^2 \mu^2 \sigma_p^2}{d + 1},
 \end{align*}
 where $|\phi'(\cdot)| \leq \mu$.
-Then using Markov's inequality we obtain
+Then, using Markov's inequality, we obtain
 \[
 \mathbb{P}(L_g \geq \frac{\varepsilon}{2r}) \leq 8 \frac{d}{d + 1} \left ( \frac{\sigma_p r \kappa \mu}{\varepsilon} \right)^2
 \]
@@ -110,12 +110,12 @@ Then using Markov's inequality we obtain
 % 2 \left ( \frac{2\sqrt{2}l}{r} \right )^{2d} \frac{\sigma_I^2}{\sigma_I^2 + D\varepsilon^2/4},
 % \]
 % where $\sigma_I$ is such that $\mathbb{V}(g(\mathbf{q})) = \mathbb{V}(I(\mathbf{q})) = \sigma_I^2 / D$.
-Let us upper bound the following probability
+Let us upper bound the following probability as
 \[
 \mathbb{P}\left (\bigcup\limits_{i = 1}^T |g(\mathbf{q}_i)| \geq \frac12 \varepsilon \right) \leq
 T \mathbb{P}\left ( |g(\mathbf{q}_i)| \geq \frac12 \varepsilon\right).
 \]
-Let us rewrite the function $g(\mathbf{q})$
+Now, let us rewrite the function $g(\mathbf{q})$ as
 \[
 g(\mathbf{q}) = 1 - \frac{1}{d + 1}\sum_{i = 1}^{d + 1} \frac{d}{\rho_i^2} +
 \frac{1}{d + 1} \sum_{i = 1}^{d + 1} \frac{d \phi_{\mathbf{q}}(\rho_i\mathbf{z}_i)}{\rho_i^2} - k(\mathbf{q}) = \frac{1}{d + 1}\sum_{i = 1}^{d + 1} \left (
@@ -123,8 +123,8 @@ g(\mathbf{q}) = 1 - \frac{1}{d + 1}\sum_{i = 1}^{d + 1} \frac{d}{\rho_i^2} +
 \right ),
 \]
 where $\phi_{\mathbf{q}}(\rho_i \mathbf{z}_i) = \frac{f_{\mathbf{xy}}(-\rho_j \mathbf{Qv}_j) + f_{\mathbf{xy}}(\rho_j \mathbf{Qv}_j)}{2 \rho_j^2}$.
-Let us suppose that $\left |\frac{1 - \phi_{\mathbf{q}}(\rho \mathbf{z})}{\rho^2} \right | \leq M$.
-Then we can apply Hoeffding's inequality
+Next, let us suppose that $\left |\frac{1 - \phi_{\mathbf{q}}(\rho \mathbf{z})}{\rho^2} \right | \leq M$.
+so that we can apply Hoeffding's inequality
 \[
 \mathbb{P}(|g(\mathbf{q})| \geq \frac12 \varepsilon) \leq
 2 \exp \left (
@@ -153,14 +153,15 @@ Then we can apply Hoeffding's inequality
 % \left ( \frac{\sigma_I^2}{\sigma_I^2 + D\varepsilon^2/4} \right )^{\frac{1}{d + 1}}.
 % \]
 
-Now the probability of $\sup_{\mathbf{q} \in \mathcal{X}^2}|g(\mathbf{q})| \leq \varepsilon$ takes the form
+Now, the probability of $\sup_{\mathbf{q} \in \mathcal{X}^2}|g(\mathbf{q})| \leq \varepsilon$ takes the form
 \[
 p = \mathbb{P} \left ( \sup_{\mathbf{q} \in \mathcal{X}^2}|g(\mathbf{q})| \leq \varepsilon \right ) \geq
 1 - \kappa_1 r^{-2d} - \kappa_2 r^2,
 \]
-where $\kappa_1 = 2 \left (2\sqrt{2}l \right)^{2d}\exp \left ( -\frac{D\varepsilon^2}{8M^2} \right )$,
+where $\kappa_1 = 2 \left (2\sqrt{2}l \right)^{2d}\exp \left ( -\frac{D\varepsilon^2}{8M^2} \right )$
+and
 $\kappa_2 = \frac{8d}{d + 1}\left ( \frac{\kappa \mu \sigma_p}{\varepsilon} \right )^2$.
-Maximizing this probability over $r$ gives us the following bound
+Maximizing this probability over $r$ gives us the following bound:
 \[
 \mathbb{P} \left ( \sup_{\mathbf{q} \in \mathcal{X}^2}|g(\mathbf{q})| \geq \varepsilon \right ) \leq
 \left (d^{\frac{-d}{d + 1}} + d^{\frac{1}{d + 1}}\right ) 2^\frac{6d + 1}{d + 1}
@@ -169,7 +170,7 @@ Maximizing this probability over $r$ gives us the following bound
 \exp \left ( -\frac{D\varepsilon^2}{8M^2(d + 1)} \right ).
 \]
 
-For RBF kernel $\kappa = \mu = 1$, $M = \frac12$, so we obtain the following bound
+For the RBF kernel, $\kappa = \mu = 1$ and $M = \frac12$, so we obtain the following bound:
 \[
 \mathbb{P} \left ( \sup_{\mathbf{q} \in \mathcal{X}^2}|g(\mathbf{q})| \geq \varepsilon \right ) \leq
 \left (d^{\frac{-d}{d + 1}} + d^{\frac{1}{d + 1}}\right ) 2^\frac{6d + 1}{d + 1}
@@ -178,7 +179,7 @@ For RBF kernel $\kappa = \mu = 1$, $M = \frac12$, so we obtain the following bou
 \exp \left ( -\frac{D\varepsilon^2}{2(d + 1)} \right ).
 \]
 
-Let us compare it with the bound for RFF
+Now, let us compare it with the bound for RFF:
 \[
 \mathbb{P} \left ( \sup_{\mathbf{q} \in \mathcal{X}^2}|g(\mathbf{q})| \geq \varepsilon \right ) \leq
 \left (d^{\frac{-d}{d + 1}} + d^{\frac{1}{d + 1}}\right )
@@ -196,8 +197,8 @@ Let us compare it with the bound for RFF
 % % Haar distributed
 % random orthogonal matrix $\mathbf{B}$.
 % %for $d = 2^k$ for $k > 0$
-For orthogonal matrix $\mathbf{Q}$ in quadrature rules the so called butterfly matrix is used.
-As it happens to be a product of butterfly structured factors, a matrix of this type conveniently possesses the property of fast multiplication. For ${d = 4}$ an example of butterfly orthogonal matrix is
+For orthogonal matrix $\mathbf{Q}$ in the quadrature rules, the so-called butterfly matrix is used.
+As it happens to be a product of the butterfly-structured factors, a matrix of this type conveniently possesses the property of fast multiplication. An example of the butterfly orthogonal matrix with $d = 4$ is
 \begin{equation*}\resizebox{.99\hsize}{!}{$
     \mathbf{B}^{(4)} =
     \begin{bmatrix}
@@ -222,7 +223,7 @@ As it happens to be a product of butterfly structured factors, a matrix of this 
 \end{equation*}
 
 \begin{definition}
-    Let $c_i = \cos\theta_i$, $s_i = \sin\theta_i$ for $i = 1,\dots,d-1$ be given. Assume $d=2^k$ with $k > 0$. Then an orthogonal matrix $\mathbf{B}^{(d)} \in \mathbb{R}^{d \times d}$ is defined recursively as follows
+    Let $c_i = \cos\theta_i$, $s_i = \sin\theta_i$ for $i = 1,\dots,d-1$ be given. Assume $d=2^k$ with $k > 0$. Then, an orthogonal matrix $\mathbf{B}^{(d)} \in \mathbb{R}^{d \times d}$ is defined recursively as follows:
     \begin{equation*}
     \mathbf{B}^{(2d)} =
     \begin{bmatrix}
@@ -231,7 +232,7 @@ As it happens to be a product of butterfly structured factors, a matrix of this 
     \end{bmatrix},
     \quad \mathbf{B}^{(1)} = 1,
     \end{equation*}
-    where $\mathbf{\hat{B}}^{(d)}$ is the same as $\mathbf{B}^{(d)}$ with indexes $i$ shifted by $d$, e.g.
+    where $\mathbf{\hat{B}}^{(d)}$ is the same as $\mathbf{B}^{(d)}$ with indexes $i$ shifted by $d$, e.g.,
     \begin{equation*}
     \mathbf{B}^{(2)} =
     \begin{bmatrix}
@@ -247,22 +248,22 @@ As it happens to be a product of butterfly structured factors, a matrix of this 
     \end{equation*}
 
 \end{definition}
-Matrix $\mathbf{B}^{(d)}$ by vector product has computational complexity $O(d\log d)$ since $\mathbf{B}^{(d)}$ has $\ceil{\log d}$ factors and each factor requires $O(d)$ operations. Another advantage is space complexity: $\mathbf{B}^{(d)}$ is fully determined by $d-1$ angles $\theta_i$, yielding $O(d)$ memory complexity.
+Matrix $\mathbf{B}^{(d)}$ by the vector product has computational complexity $O(d\log d)$ since $\mathbf{B}^{(d)}$ has $\ceil{\log d}$ factors and each factor requires $O(d)$ operations. Another advantage is space complexity; $\mathbf{B}^{(d)}$ is fully determined by $d-1$ angles $\theta_i$, yielding $O(d)$ memory complexity.
 
 The randomization is based on the sampling of angles $\theta$.
 % and we discuss it in Appendix \ref{appendix:butterfly_angles}.
 %The key to uniformly random orthogonal butterfly matrix $\mathbf{B}$ is the sequence of $d-1$ angles $\theta_i$. To get $\mathbf{B}^{(d)}$ Haar distributed,
-We follow \citep{fang1997some} algorithm that first computes a uniform random point $\mathbf{u}$ from $U_d$. It then calculates the angles by taking the ratios of the appropriate $\mathbf{u}$ coordinates $\theta_i = \frac{u_i}{u_{i+1}}$, followed by computing cosines and sines of the $\theta$'s.
-One can easily define butterfly matrix $\mathbf{B}^{(d)}$ for the cases when $d$ is not a power of two.
+We follow the\citep{fang1997some} algorithm that first computes a uniform random point $\mathbf{u}$ from $U_d$. It then calculates the angles by taking the ratios of the appropriate $\mathbf{u}$ coordinates $\theta_i = \frac{u_i}{u_{i+1}}$, followed by computing cosines and sines of the $\theta$'s.
+Consequently, one can easily define the butterfly matrix $\mathbf{B}^{(d)}$ for the cases when $d$ is not a power of two.
 
 \subsection{Not a power of two}
 \label{appendix:butterflies_not_power_of_two}
-We discuss here the procedure to generate butterfly matrices of size $d \times d$ when $d$ is not a power of~$2$.
+Here, we discuss the procedure to generate butterfly matrices of size $d \times d$ when $d$ is not a power of~$2$.
 
 %We follow the construction proposed in \cite{genz1998methods}.
-Let the number of butterfly factors $k = \ceil{\log d}$. Then $\mathbf{B}^{(d)}$ is constructed as a product of $k$ factor matrices of size $d \times d$ obtained from $k$ matrices used for generating $\mathbf{B}^{(2^k)}$. For each matrix in the product for $\mathbf{B}^{(2^k)}$, we delete the last $2^k - d$ rows and columns. We then replace with 1 every $c_i$ in the remaining $d \times d$ matrix that is in the same column as deleted $s_i$.
+Let the number of butterfly factors $k = \ceil{\log d}$. Then, $\mathbf{B}^{(d)}$ is constructed as a product of $k$-factor matrices of size $d \times d$, obtained from the $k$ matrices used for generating $\mathbf{B}^{(2^k)}$. For each matrix in the product for $\mathbf{B}^{(2^k)}$, we delete the last $2^k - d$ rows and columns. Next, we replace with $1$ every $c_i$ in the remaining $d \times d$ matrix that is in the same column as the deleted $s_i$.
 
-For the cases when $d$ is not a power of two, the resulting $\mathbf{B}$ has deficient columns with zeros (Figure \ref{fig:sparsity}, right), which introduces a bias to the integral estimate. To correct for this bias one may apply additional randomization by using a product $\mathbf{BP}$, where $\mathbf{P} \in \{0,1\}^{d \times d}$ is a permutation matrix. Even better, use a product of several $\mathbf{BP}$'s: $\mathbf{\widetilde{B}} = (\mathbf{BP})_1 (\mathbf{BP})_2 \dots (\mathbf{BP})_t$. We set $t=3$ in the experiments.
+For the cases when $d$ is not a power of two, the resulting $\mathbf{B}$ has deficient columns with zeros (Figure \ref{fig:sparsity}, right), which introduces a bias to the integral estimate. To correct for this bias, one may apply additional randomization using a product $\mathbf{BP}$, where $\mathbf{P} \in \{0,1\}^{d \times d}$ is a permutation matrix. It is even better to use a product of several $\mathbf{BP}$'s: $\mathbf{\widetilde{B}} = (\mathbf{BP})_1 (\mathbf{BP})_2 \dots (\mathbf{BP})_t$. We then set $t=3$ in the experiments.
 
 \begin{figure}[t]
 \begin{subfigure}[t]{.5\textwidth}
@@ -278,16 +279,16 @@ For the cases when $d$ is not a power of two, the resulting $\mathbf{B}$ has def
 \caption{}
 \label{fig:sparsity}
 \end{subfigure}
-\caption{(a) Butterfly orthogonal matrix factors for ${d = 16}$. (b) Sparsity pattern for $\mathbf{BPBPBP}$ (left) and $\mathbf{B}$ (right), $d=15$.}
+\caption{(a) Butterfly orthogonal matrix factors for ${d = 16}$. (b) Sparsity pattern for $\mathbf{BPBPBP}$ (left) and $\mathbf{B}$ (right), where $d=15$.}
 \end{figure}
 
 
 \section{Remarks on quadrature rules}
 \paragraph*{Even functions.}
-We note here that for specific functions~$f_{\mathbf{xy}}(\mathbf{w})$ we can derive better versions of $SR$ rule by taking on advantage of the knowledge about the integrand.
+We note here that for specific functions~$f_{\mathbf{xy}}(\mathbf{w})$, we can derive better versions of the $SR$ rule by using the knowledge about the integrand to our advantage.
 For example, the Gaussian kernel has ${f_{\mathbf{xy}}(\mathbf{w}) =
 \cos(\mathbf{w}^{\boldsymbol{\top}}(\mathbf{x} - \mathbf{y}))}$.
-Note that $f$ is even, so we can discard an excessive term in the summation in degree $(3, 3)$ rule, since $f(\mathbf{w}) = f(-\mathbf{w})$, i.e $SR^{3,3}$ rule reduces to
+Note that $f$ here is even, so we can discard an excessive term in the summation in the degree $(3, 3)$ rule, since $f(\mathbf{w}) = f(-\mathbf{w})$, i.e., the $SR^{3,3}$ rule reduces to
 \begin{equation}
 \begin{split}
 \label{eq:sr33reduced}
@@ -297,10 +298,10 @@ SR^{3,3}_{\mathbf{Q}, \rho}(f) = &\left (1 - \sum_{j=1}^{d + 1}\frac{d}{(d + 1)\
 
 \paragraph*{Obtaining a proper \texorpdfstring{$\boldsymbol{\rho}$}.}
 %%%%%%
-It may be the case when sampling $\rho$ that $1 - \sum_{j = 1}^{d + 1}\frac{d}{(d + 1)\rho_j^2} < 0$ which results in complex $a_0$ term. Simple solution is just to resample $\rho_j$ to satisfy the non-negativity of the expression.
-According to central limit theorem $\sum_{j = 1}^{d + 1} \frac{d}{(d + 1)\rho_j^2}$ tends to normal random variable with mean $1$ and variance $\frac{1}{d + 1}\frac{2}{d - 2}$.
-The probability that this values is non-negative equals ${p = \mathbb{P}(1 - \sum_{j = 1}\frac{d}{(d + 1)\rho^2} \ge 0) \leadsto \frac12}$.
-The expectation of number of resamples needed to satisfy non-negativity constraint is $\frac{1}{p}$ tends to 2.
+It may be the case while sampling $\rho$ that $1 - \sum_{j = 1}^{d + 1}\frac{d}{(d + 1)\rho_j^2} < 0$, which results in a complex $a_0$ term. In that case, the simple solution is just to resample $\rho_j$ to satisfy the non-negativity of the expression.
+According to the central limit theorem, $\sum_{j = 1}^{d + 1} \frac{d}{(d + 1)\rho_j^2}$ tends to a normal random variable with mean $1$ and variance $\frac{1}{d + 1}\frac{2}{d - 2}$.
+The probability that these values are non-negative equals ${p = \mathbb{P}(1 - \sum_{j = 1}\frac{d}{(d + 1)\rho^2} \ge 0) \leadsto \frac12}$.
+The expectation of the number of resamples needed to satisfy the non-negativity constraint is $\frac{1}{p}$ tending to 2.
 %%%%%%
 
 
@@ -320,30 +321,31 @@ k_b(\mathbf{x}, \mathbf{y}) = 2 \int_{\mathbb{R}^d} \phi_b(\mathbf{w}^{\boldsymb
 \end{equation*}
 where $\phi_b(\mathbf{w}^{\boldsymbol{\top}}\mathbf{x}) = \Theta(\mathbf{w}^{\boldsymbol{\top}}\mathbf{x}) (\mathbf{w}^{\boldsymbol{\top}}\mathbf{x})^b$, $\Theta(\cdot)$ is the Heaviside function
 and $p$ is the density of the standard Gaussian distribution.
-Such kernels can be seen as an inner product between the representation produced by infinitely wide single layer neural network with random Gaussian weights. They have closed form expressions in terms of the angle $\theta = \cos^{-1} \left( \frac{\mathbf{x}^{\boldsymbol{\top}}\mathbf{y}}{\|\mathbf{x}\|\|\mathbf{y}\|} \right)$ between %the objects $\mathbf{x}$ and $\mathbf{y}$.
+Such kernels can be seen as an inner product of the representation produced by an infinitely wide single-layer neural network with random Gaussian weights. They also have closed-form expressions in terms of the angle $\theta = \cos^{-1} \left( \frac{\mathbf{x}^{\boldsymbol{\top}}\mathbf{y}}{\|\mathbf{x}\|\|\mathbf{y}\|} \right)$ between %the objects $\mathbf{x}$ and $\mathbf{y}$.
 $\mathbf{x}$ and $\mathbf{y}$.
 
-Arc-cosine kernel of $0^{th}$-order shares the property of mapping the input on the unit hypersphere with RBF kernels, while order $1$ arc-cosine kernel preserves the norm as linear kernel (Gram matrix on original features):
+The arc-cosine kernel of the $0^{th}$-order shares the property of mapping the input on the unit hypersphere with RBF kernels, while the order $1$ arc-cosine kernel preserves the norm as the linear kernel (Gram matrix on original features):
 
 These expressions for $0^{th}$-order and $1^{st}$-order arc-cosine kernels are given by
 \[
 k_0(\mathbf{x},\mathbf{y}) = 1 - \frac{\theta}{\pi},\qquad k_1(\mathbf{x},\mathbf{y}) = \frac{\|\mathbf{x}\|\|\mathbf{y}\|}{\pi}(\sin\theta + (\pi - \theta)\cos\theta).
 \]
-The $0$-order arc-cosine kernel is given by ${k_0(\mathbf{x},\mathbf{y}) = 1 - \frac{\theta}{\pi}}$, the $1$-order kernel is given by ${k_1(\mathbf{x},\mathbf{y}) = \frac{\|\mathbf{x}\|\|\mathbf{y}\|}{\pi}(\sin\theta + (\pi - \theta)\cos\theta)}$.
+The $0$-order arc-cosine kernel is given by ${k_0(\mathbf{x},\mathbf{y}) = 1 - \frac{\theta}{\pi}}$; the $1$-order kernel is given by ${k_1(\mathbf{x},\mathbf{y}) = \frac{\|\mathbf{x}\|\|\mathbf{y}\|}{\pi}(\sin\theta + (\pi - \theta)\cos\theta)}$.
 
 Let
-${\phi_0(\mathbf{w}^{\boldsymbol{\top}}\mathbf{x}) = \Theta(\mathbf{w}^{\boldsymbol{\top}}\mathbf{x})}$,
-${\phi_1(\mathbf{w}^{\boldsymbol{\top}}\mathbf{x}) = \max (0, \mathbf{w}^{\boldsymbol{\top}}\mathbf{x})}$. We now can rewrite the integral representation as follows:
+${\phi_0(\mathbf{w}^{\boldsymbol{\top}}\mathbf{x}) = \Theta(\mathbf{w}^{\boldsymbol{\top}}\mathbf{x})}$
+and
+${\phi_1(\mathbf{w}^{\boldsymbol{\top}}\mathbf{x}) = \max (0, \mathbf{w}^{\boldsymbol{\top}}\mathbf{x})}$. We can now rewrite the integral representation as follows:
 \begin{align*}
 k_{b}(\mathbf{x},\mathbf{y}) &= 2 \int\limits_{\mathbb{R}^d}  \phi_b(\mathbf{w}^{\boldsymbol{\top}}\mathbf{x}) \phi_b(\mathbf{w}^{\boldsymbol{\top}}\mathbf{y}) p(\mathbf{w}) d\mathbf{w} \approx \frac{2}{n} \sum\limits_{i=1}^n SR_{\mathbf{Q}_i,\boldsymbol{\rho}_i}^{3,3}.
 \end{align*}
-For arc-cosine kernel of order $0$ the value of the function $\phi_0(0) = \Theta(0) = 0.5$ results in
+For an arc-cosine kernel of the order $0$, the value of the function $\phi_0(0) = \Theta(0) = 0.5$ results in
 \begin{equation*}
 \begin{split}
 SR^{3,3}_{\mathbf{Q}, \rho}(f) = & 0.25 \left (1 - \sum_{j = 1}^{d + 1}\frac{d}{(d + 1)\rho_j^2} \right ) + \frac{d}{d+1}\sum\limits_{j=1}^{d+1} \frac{f(\rho_j \mathbf{Qv}_j) + f(-\rho_j \mathbf{Qv}_j)}{2\rho^2}.
 \end{split}
 \end{equation*}
-In the case of arc-cosine kernel of order $1$, the value of $\phi_1(0)$ is $0$ and the $SR^{3,3}$ rule reduces to
+Whereas in the case of an arc-cosine kernel of the order $1$, the value of $\phi_1(0)$ is $0$, so the $SR^{3,3}$ rule reduces to
 \begin{equation*}
 SR^{3,3}_{\mathbf{Q}, \rho}(f) = \frac{d}{d+1}\sum\limits_{j=1}^{d+1} \frac{f(|\rho \mathbf{Qv}_j|)}{2\rho_j^2}.
 \end{equation*}
