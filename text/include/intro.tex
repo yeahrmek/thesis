@@ -1,0 +1,140 @@
+\chapter{Introduction}
+\label{chap:intro}
+
+
+% Learning dependencies from data with neural networks has become ubiquituous.
+% However, when it comes to problems without any structure in inputs (like in images or audio)
+% other techniques can provide accurate results.
+% Bayesian approaches are ones of the most appealing.
+% First, they allow to avoid over-fitting by imposing
+% prior distribution on the parameters of the model and then marginalizing them out
+% which acts like a regularization.
+% Second, bayesian models are probabilistic models,
+% so the can provide uncertainty estimate of the predictions.
+
+
+
+% This thesis focuses on building large-scale Gaussian Process models.
+% Chapter~\ref{chap:gp_on_grids} describes efficient construction for the
+% case of full factorial or incomplete factorial Design of Experiments.
+% In Chapter~\ref{chap:unstructured_datasets} we develop general approach
+% fo unstructured data sets based on random features.
+% Chapter~\ref{chap:applications} is dedicated to applications of the proposed
+% approaches on several problems, namely, density estimation, tensor completion
+% and simultaneous localization and mapping.
+% In this chapter we give necessary background on the kernel methods and Gaussian Processes.
+
+
+Learning dependencies from data with neural networks has become ubiquitous.
+However, when it comes to problems without any structure in inputs (which is often the case for tabular data)
+other techniques can provide accurate results.
+Bayesian approaches are ones of the most appealing.
+First, they allow to avoid over-fitting by imposing
+prior distribution on the parameters of the model and then marginalizing them out
+which acts as a regularization.
+Second, Bayesian models are probabilistic models,
+so they can provide uncertainty estimate of the predictions.
+Gaussian Process (GP) based models is one of the most popular bayesian tools,
+especially for regression tasks, which is often applied to model physical characteristics,
+time series forecasting, object tracking, and many others.
+
+Technology and availability of computational resources allow generating
+a lot of data for a given problem.
+So, to succeed in solving the problem the most crucial role plays
+accurate analysis of the obtained data.
+Generally, in data-driven approaches the more data we have, the better model
+we can construct.
+The standard approach to build GP models heavily suffers from the computational
+complexity that grows cubically with the data set's size.
+Therefore, developing large-scale GP approaches is
+an important research direction.
+
+When we need to analyze some object of phenomenon, the data generation process is one of the
+initial stages in analysis.
+The properly generated data set allows capturing all the peculiarities of
+the characteristics we are interested in.
+In many engineering applications the data is often generated on a grid.
+This can be encouraged by the experimental setup.
+For example, designing some assembly part engineer can run a computer simulation
+to measure its characteristics or can create the detail in full-scale
+and conduct live experiments.
+In the former case there are some parameters that can be easily changed,
+like some external conditions, so it is natural to choose their values on a grid.
+The parameters of the detail itself are much harder or expensive to change.
+In this case, the data set has a particular structure.
+Sometimes, there can be missing points in this structure due
+to some simulation errors or the infeasibility of some set of parameters.
+Nevertheless, having the structure in the data set, even with missing points,
+can be utilized to build more efficient algorithms.
+In many cases, however, the data set is unstructured.
+To cover such cases approximate models should be developed.
+
+Gaussian Processes is a simple yet powerful model that can be used
+as a part of other complex systems, e.g., Bayesian optimization,
+multi-fidelity modeling, etc.
+Developing accurate large-scale GP models allows us to
+apply such models in other systems.
+For example, GP models can be incorporated into deep neural networks,
+density estimate pipeline or simultaneous localization and mapping
+problems in robotics.
+Using GP models not only may result in better accuracy,
+but can also provide an analytical solution, regularize the final model, etc.
+
+To sum up, the development of large-scale Gaussian Process models for
+structured and unstructured data sets is an actual research direction.
+Providing examples on how to use different properties of such GP models
+in different data-driven systems is essential and has a lot of practical
+interest.
+
+The topic of this thesis is large-scale Gaussian Process models
+and its applications.
+The subject of the research is
+methods to build GP models in case of large structured and unstructured data sets
+and approaches to incorporate such models into different data-driven systems.
+The main goal of this work is to develop computationally efficient
+methods to fit large-scale GP models for structured and unstructured data sets
+and to provide examples of building such models into different systems.
+To achieve this goal, the following tasks should be considered:
+\begin{enumerate}
+    \item Development of the computationally efficient method for GP inference
+    that takes into account the special structure of the data set.
+    \item Development of the computationally efficient approximation for the GP inference
+    in case of unstructured data sets.
+    \item Implement the proposed approaches, demonstrate ways to build large-scale GP methods into different models.
+\end{enumerate}
+
+The scientific novelty of this work includes:
+\begin{itemize}
+    \item Computationally efficient approach
+    for exact GP inference in case of structured data sets with possible missing points.
+    \item A new technique for approximation of the kernel function that enables
+    computationally efficient GP inference.
+    \item Theoretical analysis of the developed kernel function approximation.
+    \item We developed several approaches based on the proposed methods
+    and achieve state-of-the-art performance.
+    In particular, we designed algorithms for tensor completion,
+    probability density estimate and simultaneous localization and mapping.
+\end{itemize}
+
+The practical significance of the developed methods was demonstrated
+on a set of real-world engineering problems.
+The developed approaches for tensor completion problems,
+probability density estimate, simultaneous localization and mapping
+all based on the proposed methods justifies the broad applicability of the obtained results.
+
+The reliability of the presented results presented is supported
+by double-blind reviews of the results at top international conferences;
+by presentations and seminars and various academic venues;
+by conducted numerical experiments.
+
+The structure of the thesis is the following.
+The rest of this chapter gives an introduction to Gaussian Process models.
+Chapter~\ref{chap:gp_on_grids} describes efficient construction for the
+case of full factorial or incomplete factorial Design of Experiments.
+In Chapter~\ref{chap:unstructured_datasets}, we develop general approach
+for unstructured data sets based on random features.
+Chapter~\ref{chap:applications} is dedicated to applications of the proposed
+approaches on several problems, namely, density estimation, tensor completion
+and simultaneous localization and mapping.
+In this chapter, we give the necessary background on the kernel methods and Gaussian Processes.
+

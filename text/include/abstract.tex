@@ -1,0 +1,19 @@
+\chapter{Abstract}
+\label{chap:abstract}
+
+This thesis is devoted to the problem of building large-scale models based on
+Gaussian Processes (GP).
+We consider two cases: (1) the data sets in which input points lie on a multi-dimension grid,
+and (2) general data sets without any specific structure.
+For the first case, we develop a technique for calculating an exact inference for the GP regression
+model by applying tensor arithmetic that efficiently handles the structure of the data set.
+The proposed approach can also deal with missing values, which are often a problem in practical applications.
+For the second case of unstructured data sets, we developed a kernel approximation technique
+based on an integral representation of the kernel function and special quadrature rules.
+We show that our approach is a generalization of several prominent papers in this area.
+The experimental section demonstrates superiority of the proposed technique compared to other
+methods.
+Finally, we develop several methods based on the proposed large-scale models for
+three different problems: tensor completion, density estimate and simultaneous localization
+and mapping.
+This very diverse set of problems demonstrate how our models can be built into different pipelines and show some advantages of this approach.

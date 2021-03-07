@@ -1,0 +1,829 @@
+\section{Score Matching based on Random Features}
+\label{sec:score_matching}
+
+One of the core problems in statistics is a density estimation.
+The most well-known approach is the Maximum Likelihood Estimation (MLE).
+However, MLE and all other approaches based on MLE require normalizing constant to be known
+or computed efficiently, which is not the case in many real world problems.
+The intractability of the normalizing constant makes the approach infeasible.
+In contrast, an unsupervised score matching estimator~\cite{Hyvarinen2005} based on Fisher divergence minimization, does not depend on the normalizing constant.
+The resulting estimate is proved to be asymptotically normal and consistent in the case when
+data and model distributions supports coincide.
+There numerous developments of the
+ idea~\cite{hyvarinen2007some, Lyu2012, Gutmann2012bregman, Kanti2016, dai2018kernel}.
+
+Another important part of the density estimation is the class of models to search the solution in.
+A special interest is paid here to an exponential family of distributions which leads to the
+closed-form solution~\cite{hyvarinen2007some, forbes2015linear, Lin2016, Shiqing2018, monti2018}.
+A generalization of the finite-dimensional exponential families is a kernel exponential family
+(KEF).
+In this case the natural parameter is treated a function from some
+Reproducing Kernel Hilbert Space (RKHS).
+It can be seen as infinite-dimensional generalization of the exponential family.
+The KEF contains all well-known exponential family densities such as Exponential, Gaussian,
+Gamma, etc.
+In addition, RKHS reveals a sufficiently rich class of
+estimators with convergence guarantees w.r.t. different
+metrics~\cite{Gretton2013, Gretton2015}.
+The main disadvantage is the computational cost for the sample matrix inversion making this
+method inapplicable even for a moderate amount of the training data.
+
+To approach the computational complexity issue~\cite{sutherland2017efficient, GrettonDeep} propose to use Nystr{\"o}m-type approximation of the kernel function.
+Here we propose to use randomized feature maps as considered in
+Chapter~\ref{chap:unstructured_datasets}.
+Employing special structure on the discussed in Section~\ref{subsec:ortho}
+we come up with a faster model than Nystr{\"o}-type approximation.
+There are a lot of papers studying the convergence of the RFF models for the regression problem.
+The optimal learning rate with $\mathcal{O}(\sqrt{n}\log n)$ features is the same as for the
+full kernel \cite{aless2016generalization}
+which gives substantial speed up.
+The theoretical properties of using RFF for score matching is less studied,
+though there are some general theoretical results on RFF and
+higher order kernel derivatives~\cite{Orlicz,OperatorValuedKernels}.
+
+Naive approach to score matching with random features suffer from several issues.
+The first one is an oscillating behaviour in the tails of the distribution~\cite{Gretton2015}.
+The second problem is poor convergence in the case of disjoint support
+(consistency could not be guaranteed) or in the areas
+where density value is close to zero~\cite{GrettonDeep}.
+Inconsistency explains low approximation accuracy in regions of almost zero density.
+
+It was shown that convolution with small Gaussian noise
+(which is equivalent to the noisy data perturbation) improves learning behaviour and approximation
+quality, e.g.~\cite{song2019generative,GANinstability, NoisyFGAN}.
+It makes the support of both densities (distribution of the data and the model distribution)
+the same and allows to overcome the aforementioned issue.
+For most of the models the convolution cannot be calculated analytically,
+so authors usually stick to the second-order Taylor series expansion
+\cite{NIPS2010_4060, Reehorst_2019, NoisyFGAN} which results in a special
+regularization term in the loss function.
+It turns out that the noise level is an important parameter.
+With large noise level we have better convergence but lower accuracy.
+With smaller noise level the convergence is less stable, but the
+solution is more accurate.
+This means, that tuning of noise level is required.
+Recently, it was proposed to use several noise levels optimizing
+cumulative objective~\cite{song2019generative}.
+% In this work we show, that for kernel exponential family we can find
+% the optimal noise parameters by a simple gradient-based approach.
+
+
+In this section we introduce method to estimate unknown distribution using
+denoising score matching combined with random features.
+To tackle the convergence issues we convolve the loss function with symmetric noise analytically.
+It allows to avoid additional regularization terms as they are embedded into the loss function naturally.
+The derived expression of the loss function explicitly contains the noise parameters
+that allows us to use simple gradient-based approaches to tune these parameters.
+In the experimental section we demonstrate the performance of our approach both in terms of
+accuracy and training time.
+While the quality is comparable to Nystr{\"o}m-type approximations, the training speed is much faster.
+
+
+% The paper is organized as follows.
+% In Section~\ref{sec:background} we give background information
+% that is used to construct the final model:
+% score-matching and its RKHS form, learning using random features.
+% Section~\ref{chap:body} provides results on the necessary condition of denoising score matching
+% and its RFF approximation.
+% Numerical experiments are presented in Section~\ref{chap:experiments}.
+% Finally, Section~\ref{chap:Conclusion} concludes the results of conducted research.
+% All additional materials are presented in
+% appendices~\ref{chap:Technical},~\ref{sec:B},~\ref{sec:C}.
+
+
+\subsection{Score matching}
+Let ${\cal D} = \{{\bf x}_a\}_{a = 1}^d, {\bf x}_a \in \mathbb{R}^d$ be a set of observations
+drawn from an unknown distribution with a probability density function $p_0({\bf x})$.
+Let $p({\bf x}, {\bm \theta})$ be a model density parameterized by
+${\bm \theta} \in \Theta \subset \mathbb{R}^m$.
+The task is to find such ${\bm \theta}^*$ that the model density is close to the real one:
+$p({\bf x}, {\bm \theta}^*) \approx p_0({\bf x})$.
+In score matching approach we minimize the Fisher divergence:
+\begin{equation}
+    J(p_0 \| p_{\bm{\theta}}) = \frac12 \int p_0({\bf x})\|\nabla \log p({\bf x}, {\bm \theta}) - \nabla \log p_0({\bf x})\|_2^2 d\bm{x}.
+    \label{eq:fisher}
+\end{equation}
+Under sufficiently weak regularity conditions (see \cite{Hyvarinen2005})
+the minimization of the Fisher divergence is equivalent to minimization of
+\begin{equation}
+    J(p_0 \| p_{\bm{\theta}}) \sim \mathbb{E}_{p_0}\left[\Delta \log p({\bf x}, {\bm \theta}) + \frac{1}{2}\|\nabla \log p({\bf x}, {\bm \theta})\|^2\right]
+    \label{eq:fisher_sm}.
+\end{equation}
+Note, that the normalizing constant does not depend on ${\bf x}$,
+therefore, $p({\bf x}, {\bm \theta})$ in \eqref{eq:fisher_sm}
+could be replaced with unnormalized one
+$\Tilde{p}({\bf x}, {\bm \theta}) = p({\bf x}, {\bm \theta}) Z({\bm \theta})$.
+In an abuse of notation from now on we will use
+$p({\bf x}, {\bm \theta})$ to denote the unnormalized density if it not stated explicitly.
+% $\Tilde{p}({\bf x}, {\bm \theta})$ as .
+Objective \eqref{eq:fisher_sm} now does not depend on unknown density $p_0$ and provides an
+opportunity to estimate $p_0$ up to the normalizing constant using only samples drawn from $p_0$:
+\begin{equation}
+    \hat{J}(p_0 \| p_{\bm{\theta}}) = \frac{1}{n}\sum_{a = 1}^n\left[\Delta \log p({\bf x}_a, {\bm \theta}) + \frac{1}{2}\|\nabla \log p({\bf x}_a, {\bm \theta})\|^2\right] \to \min_{{\bm \theta}}.
+    \label{eq:fisher_sm_sample}
+\end{equation}
+This loss suffers from several issues.
+Firstly, the expression \eqref{eq:fisher} assumes that model and data distributions
+have the same support.
+However, in real world the real distribution lies on a low-dimensional manifold embedded
+in $\mathbb{R}^d$ \cite{song2019generative},
+while support of the model density is usually the whole space.
+Secondly, score matching convergence is guaranteed only in the case of
+${\rm supp\;} p_0 = \mathbb{R}^d$ (see \cite{Hyvarinen2005}).
+
+To tackle the issue we use Denoising Score Matching (DSM) \cite{Denoising}.
+In this approach we add noise to the data.
+The score matching loss in this case is given by
+\begin{equation}
+    \label{eq:denoising_sm}
+    DSM(p_{\bm{\theta}}) = \mathbb{E}_{p_{\varepsilon}}\mathbb{E}_{p_0}\left[\Delta \log p({\bf x} + {\bm \varepsilon}, {\bm \theta}) + \frac{1}{2}\|\nabla \log p({\bf x} + {\bm \varepsilon}, {\bm \theta})\|^2\right],
+\end{equation}
+where $p_{\varepsilon}(\bm{x})$ is a distribution of noise.
+Now both densities have the same support, so the solution converges.
+The optimal model satisfies
+$\nabla p_{\bm{\theta}} = \nabla \left [p_0 * p_{\varepsilon} \right ] (\bm{x})$,
+where $*$ is the convolution operator.
+However, $\nabla \left [p_0 * p_{\varepsilon} \right ] (\bm{x})$ is
+close to the true density $\nabla p_0(\bm{x})$
+only when the noise is small enough.
+
+To estimate the loss in general case we can generate finite set of
+noisy samples and use them to estimate expectation in the loss function.
+Another option is to use Taylor series expansion assuming that noise level is small.
+In both cases we get approximate value of the loss function.
+Moreover, when we use Taylor series expansion we need to calculate
+higher order derivatives of the model which can be computationally complex
+(for example, in case of neural networks).
+However, for the kernel exponential family the denoising score matching loss
+can be computed exactly.
+
+\subsubsection{Kernel exponential family}
+The kernel exponential family is a set of distributions where unnormalized
+probability density functions
+$p_f(\bf{x})$ satisfy
+$\log p_f({\bf x}) = f({\bf x}) + \log q_0({\bf x})$,
+$f \in \mathcal{H}$,
+$\mathcal{H}$ is some Reproducing Kernel Hilbert Space (RKHS) with kernel $k$ and
+$q_0$ is some generating density.
+The normalizing constant is usually not known and cannot be computed analytically.
+The class of such densities is rich enough.
+In fact it is dense in a set of continuous probability density functions
+that decay at the same rate as $q_0$.
+
+In a well specified case, i.e. $p_0$ belongs to the kernel exponential family with RKHS
+$\mathcal{H}$, the score matching loss \eqref{eq:fisher_sm}
+can be expressed as (see \cite{Gretton2013})
+\begin{equation}
+    \label{eq:sm_kernel}
+    J(p_0 \| p_f) =
+    \frac{1}{2} \langle f, Cf\rangle_{\mathcal{H}} + \langle f, \xi\rangle_{\mathcal{H}} + J(p_0 \| q_0)
+\end{equation}
+where
+$\partial^{\alpha,\beta}_{i, j + d} k({\bf x, \bf y}) =
+\frac{\partial^{\alpha + \beta}}{\partial x_i^{\alpha}\partial y_j^{\beta}}k({\bf x, \bf y})$
+and
+\begin{align*}
+    C &= \mathbb{E}_{p_0} \left[
+        \sum_{i = 1}^d \partial_i k ({\bf  x}, \cdot) \otimes \partial_i k ({\bf  x}, \cdot)
+    \right], \quad C \colon \mathcal{H} \to \mathcal{H} \\
+    \xi &= \mathbb{E}_{p_0} \left[
+        \sum_{i = 1}^d \partial_i k ({\bf  x}, \cdot)\partial_i \log q_0({\bf x}) +
+        \partial^2_i k ({\bf  x}, \cdot)
+        \right] \in \mathcal{H}.
+\end{align*}
+
+Using the general representer theorem the optimal $f({\bf x})$ can be found
+as a weighted sum of the kernel derivatives located at the training samples.
+To find the weights we need to invert $nd \times nd$ matrix and the computational
+complexity, therefore, is $O(n^3d^3)$.
+While the convergence in RKHS of this estimator implies the convergence in $L^r$,
+in terms of Kullback-Leibler divergence and Hellinger distance,
+in the misspecified case a density estimator remains the same,
+but with convergence guarantees only for Fisher divergence.
+
+To reduce complexity the authors of \cite{sutherland2017efficient} proposed to
+find solution in a span over a randomly selected subset of training samples (inducing points).
+The computational cost of this approach is $O(m^3d^3)$,
+where $m$ is a number of inducing points.
+Additional sub-sampling over $md$ basis functions enables even more computationally efficient
+approach.
+In this extreme case the complexity is $O(m^2nd + m^3)$.
+As in the case of full data usage, obtained estimator is consistent when $p_0$
+lies in the kernel exponential family,
+but the rate of convergence is slower (under assumptions presented in \cite{sutherland2017efficient}).
+The misspecified case was not studied.
+
+To obtain consistent estimator from the kernel exponential family
+the authors of \cite{GrettonDeep} used denoising score matching with Taylor series expansion.
+This results in an additional regularization term in the loss function
+that penalizes second derivatives of the model.
+The need to calculate second derivatives restricts the approach only to
+relatively low-dimensional cases.
+
+%\newpage
+\paragraph*{Random Features}
+\label{sec:inrto_rff}
+Random Features based approaches were discussed in Chapter~\ref{chap:unstructured_datasets}.
+The difference in score matching problems is that
+we work with the derivatives of the kernel function.
+However, the same idea can be applied to the kernel derivatives
+\begin{equation}
+    \partial^{{\bf p}, {\bf q}} k({\bf x - y}) = \int p({\bf w}) \partial^{{\bf p}}\left[e^{j\bf{w^\top x}}\right]\partial^{{\bf q}}\left[e^{-j\bf{w^\top y}}\right]d\bf{w}
+\end{equation}
+where ${\bf p}, {\bf q} \in \mathbb{R}^d$ denote multi-indices,
+$\partial^{\bf{p}} f =
+\frac{\partial^{|\bf{p}_1 + \bf{p}_2 + \cdots + \bf{p}_d |} }{\partial x_1^{p_1} \ldots
+\partial x_d^{p_d}} f$
+and $\bf{p}$ and $\bf{q}$ act on the first and the second arguments of
+the kernel correspondingly.
+The theoretical properties of using random features are well studied only for the
+kernel ridge regression \cite{aless2016generalization, li2018unified}.
+
+\subsection{Kernel Denoising Score Matching}
+\label{chap:body}
+This section provides the optimal solution for the Kernel Denoising Score Matching,
+its RFF approximation and some error bounds of the resulting model.
+Here we assume that the noise distribution is symmetric, i.e.
+$p_{\varepsilon}(\bf{x}) = p_{\varepsilon}(-\bf{x})$.
+
+\subsection{Denoising Score Matching in RKHS}
+We start from rewriting the expression for the Denoising Score Matching objective
+\eqref{eq:denoising_sm}
+and follow the same logic in derivation as in paper \cite{Gretton2013}
+with the difference that our objective function is the convolution of the usual
+score matching objective with noise distribution.
+
+Let $V: \mathbb{R}^m \to \mathbb{R}$ be a convex and differentiable function.
+Assume that the objective function takes the form
+\[
+    J(f) = V(\langle \phi_1, f\rangle_\mathcal{H},
+             \langle \phi_2, f\rangle_\mathcal{H}, \ldots,
+             \langle \phi_m, f\rangle_\mathcal{H}) + \frac{\lambda}{2}\|f\|^2_\mathcal{H},
+\]
+for any set $\{\phi_i(\cdot)\}_{i = 1}^m$, $\phi_i \in \mathcal{H}$.
+
+For our case we define the set of functions $\{\phi_i(\cdot)\}$ as follows
+\begin{align*}
+    &\phi_{(a - 1)d + i}(\cdot) = \partial_i k({\bf x}_a + {\bf y}, \cdot),\\
+    &\phi_{nd + 1}(\cdot) = \frac{1}{n}\sum\limits_{a, i = 1}^{n, d} \partial_i^2 k({\bf x}_a + {\bf y}, \cdot) + \partial_i k({\bf x}_a + {\bf y}, \cdot)\partial_i \log q_0({\bf x}_a + {\bf y}),
+\end{align*}
+and for simplicity let us denote it as $\{\phi_i(y, \cdot)\}_{i = 1}^m$, $m = nd + 1$.
+Now let us define a linear operator
+$A({\bf y}): \mathcal{H} \to \mathbb{R}^m$, $f \to \{\langle\phi_i({\bf y}, \cdot),
+f\rangle_\mathcal{H}\}_{i = 1}^m$.
+Then the objective \eqref{eq:denoising_sm} can be written as
+\begin{equation}
+    \label{eq:denoising_objective_rkhs}
+    f^* = \argmin_{f \in \mathcal{H}} \int p_{\varepsilon}({\bf y})V(A({\bf y})f)d{\bf y}
+    + \frac{\lambda}{2}\|f\|^2,
+\end{equation}
+with $V(\theta_1, \ldots, \theta_{nd + 1}) =
+\frac{1}{2n}\sum\limits_{a = 1}^n\sum\limits_{i = 1}^d\theta^2_{(a - 1)d + i} +
+\theta_{nd + 1}$.
+
+Using the first order optimality condition we can see that the solution takes the form
+\[
+    f = \int p_{\varepsilon}({\bf y})A^*({\bf y}){\bm \alpha}({\bf y})d {\bf y},
+    \quad
+    {\bm \alpha}({\bf y}) = -\frac{1}{\lambda}\nabla V(A({\bf y})f),
+\]
+where $A^*({\bf y}): \mathbb{R}^m \to \mathcal{H}$ is an adjoint to $A({\bf y})$.
+% and
+% $A^*({\bf y}){\bm \alpha} = \sum_{i = 1}^m \alpha_i\phi_i({\bf y}, \cdot)$, denoting
+% \[
+%     {\bm \alpha}({\bf y}) = -\frac{1}{\lambda}\nabla V(A({\bf y})f),\quad f = \int p_{\varepsilon}({\bf y})A^*({\bf y}){\bm \alpha}({\bf y})d {\bf y}
+% \]
+% first order optimality condition could be written as an integral equation on ${\bm \alpha}({\bf y})$:
+% \begin{equation}
+%     {\bm \alpha}({\bf y}) = -\frac{1}{\lambda}\nabla V\left(\int p_{\varepsilon}({\bf z})A({\bf y})A^*({\bf z})\alpha({\bf z})d{\bf z}\right)
+% \end{equation}
+% where $A({\bf y})A^*({\bf z})\alpha({\bf z}) = \sum\limits_{i = 1}^m\alpha_i({\bf z})\{\langle \phi_j({\bf y}, \cdot),  \phi_i({\bf z}, \cdot)\rangle\}_{j = 1}^m = {\bm K}({\bf y}, {\bf z}){\bm \alpha}({\bf z})$.
+Now we are ready to formulate the proposition.
+\begin{proposition}
+    The solution to \eqref{eq:denoising_objective_rkhs} has the following form
+    \[
+        f^* = B \left [
+            -\frac{1}{n\lambda}C(\bm{\beta}^*) + \frac{1}{n\lambda^2}b
+        \right ],
+    \]
+    where
+    $\hat{A}({\bf y}) \colon \mathcal{H} \to \mathbb{R}^{m - 1}$,
+    $\left ( \hat{A}({\bf y})f \right )_i = \left( A(\bf{y})f \right )_i, i=1, \ldots, m-1$,
+    \newline
+    $B = \int p_{\varepsilon}({\bf y})\hat{A}^*({\bf y})\hat{A}({\bf y}) d{\bf y}$,
+    $b = \int p_{\varepsilon}({\bf y})\phi_m({\bf y}, \cdot) d {\bf y}$,
+    $C(\bm{\beta}) = \int p_{\varepsilon}({\bf x})\hat{A}({\bf y})\bm{\beta}({\bf y})d{\bf y}$
+    and ${\bm\beta}^*({\bf y})$ is the solution to
+    \begin{equation}
+        \bm{\beta}({\bf y}) = -\frac{1}{n\lambda}
+        \int p_{\varepsilon}({\bf z}) \hat{A}({\bf y})\hat{A}({\bf z})^*\bm{\beta}({\bf z})
+        d{\bf z}
+        + \frac{1}{n\lambda^2}
+        \int p_{\varepsilon}({\bf z}) \hat{A}({ \bf y}) \phi_m({\bf z}, \cdot)d{\bf z}.
+    \label{eq:beta_integal}
+    \end{equation}
+\end{proposition}
+See the details on derivation in \ref{sec:exact_solution}.
+
+The optimal model requires solution of operator equation and in general
+this is a difficult task.
+In order to avoid this, let us consider a Monte-Carlo approximation
+of~\eqref{eq:beta_integal}.
+Suppose we sampled $K$ noise vectors $\{{\bf z}_k\}_{k = 1}^K$,
+${\bf z}_k \sim p_{\varepsilon}$.
+In this case the approximation to the optimal ${\bm \beta}^*$ can be found
+by solving the system of equations
+\begin{equation}
+    \label{eq:beta_finite_sample}
+    {\bm \beta}_K({\bf y}) = -\frac{1}{nK\lambda}
+    \sum\limits_{k = 1}^K
+    \hat{A}({\bf y})\hat{A}({\bf z}_k)^*{\bm \beta}_K({\bf z}_k)
+    + \frac{1}{n\lambda^2}\int p_{\varepsilon}({\bf z}) \hat{A}({\bf y}) \phi_m({\bf z}, \cdot)d{\bf z}.
+\end{equation}
+The obtained result can then be used to derive an approximation of $f^*$,
+but the computational complexity is $O(n^3d^3K^3 + n^2d^2K)$.
+Moreover, the convolution in the second term of \eqref{eq:beta_finite_sample} could be directly computed
+only for a limited set of kernels, e.g. Radial Basis Function kernel (RBF).
+
+In order to improve the computational complexity we employ RFF approach
+to the kernel function approximation.
+
+\subsubsection{RFF for Denoising Score Matching}
+For the RFF \eqref{eq:bochner}
+we introduce the following matrix of RFF derivatives $\partial {\bm \Phi}_y$
+corrupted by noise $\bf{y}$.
+The $((a - 1)d + i)$-th row of matrix $\partial {\bm \Phi}_y$ is given by
+$[\partial \bm{\Phi}_y]_{(a - 1)d + i} = \partial_i \bm{\phi}^\top(\bm{W}({\bf x}_a + \bf{y}) + \bm{b})$,
+where $\partial_i \bm{\phi}^\top(\bm{W}({\bf x}_a + \bf{y}) + \bm{b})$
+is an element-wise partial derivative of the feature vector at point ${\bf x}_a$.
+Similarly, for the second derivatives we have
+$[\partial^2 \bm{\Phi}_y]_{(a - 1)d + i} =
+\partial^2_i \bm{\phi}^\top(\bm{W}({\bf x}_a + \bf{y}) + \bm{b})$.
+The finite sample solution to \eqref{eq:beta_finite_sample} is given by
+\[
+    f_K
+    = \frac{1}{n\lambda^2}{\bm \phi}(\cdot)^{\top}{\bm H}
+    \left[-\frac{1}{K}\left(\frac{1}{K}\partial  {\bm \Phi}_K^{\top}\partial{\bm \Phi}_K + n\lambda {\bf I}\right)^{-1}\partial {\bm \Phi}_K^{\top}\partial{\bm \Phi}_K \odot {\bm h} + {\bm h}\right]
+    -\frac{1}{\lambda} {\bm \phi}(\cdot)^{\top}{\bm h}.
+\]
+Here operator $\odot$ denotes the Hadamard product.
+Let us denote
+\begin{equation}
+    \label{eq:h}
+    {\bm H} = \int p_{\varepsilon}({\bf y})\partial{\bm \Phi}_y^{\top}\partial{\bm \Phi}_y
+    d{\bf y},
+    \quad
+    {\bm h} = \frac{1}{n}(\partial^2 {\bm \Phi}_z * p({\bf z}))^{\top}{\bf 1}.
+\end{equation}
+Then by taking limit over $K \to \infty$ we obtain the final RFF solution
+\begin{equation}
+\label{eq:rff_f}
+    f_{m}^* = \lim\limits_{K \to \infty} f_K
+    = \frac{1}{\lambda}{\bm \phi}(\cdot)^{\top}({\bm H} + n\lambda{\bf I})^{-1}{\bm Hh}
+    - \frac{1}{\lambda}{\bm \phi}(\cdot)^{\top}{\bm h}.
+\end{equation}
+The detailed derivation can be found in \ref{sec:rff_solution_derivation}.
+
+Similar result can be derived for the Nystr\"om-type approximation
+(see \ref{sec:Nystrom}).
+The disadvantage in this case is that we need to calculate
+convolution of the first and second order derivatives with the noise distribution
+for each kernel.
+For RFF, on the other hand, all the terms remains the same for any shift-invariant kernel
+except the distribution of weights $\bf{W}$, which is much more convenient.
+
+Another important thing we would like to stress is that in the resulting solution
+each feature has a weight proportional to
+$\exp \left ( -\frac{\sigma^2}{2} \|{\bf w}_i\| \right )$
+(see \ref{sec:rff_solution_derivation} for details).
+This means that the high-frequency features have weight which is close to zero.
+Such behaviour can be interpreted as a regularization that penalizes
+oscillating terms.
+
+There are several hyper-parameters in the approach that affects the resulting
+quality, namely, the kernel hyper-parameters ${\bm \theta}$,
+the regularization parameter $\lambda$ and,
+assuming that the noise is zero-mean Gaussian, the noise variance $\sigma$.
+To tune these parameters we use the loss on the hold-out (validation) set.
+The loss in this case is ordinary score matching (no denoising) loss as we would like to estimate
+how good our model approximates the original data, not the noisy one.
+
+Another important part of the algorithm is the base density $q_0$.
+From a theoretical point of view, base density is responsible for the tails of the
+distribution and do not affect the estimator in the areas with high density.
+Therefore, in this section we consider three different options for $q_0$:
+uniform distribution with support bounded by particular training sample,
+multivariate Gaussian distribution and the mixture of Gaussians.
+In the latter case, $q_0$ is fitted before training using Bayesian Mixture Model \cite{bishop}.
+
+At the end of the training we estimate the normalizing constant via importance sampling
+as was proposed in \cite{GrettonDeep}.
+It should be noted that in the case of uniform base density normalization could not be
+estimated properly due to the unknown data support measure.
+The whole method is summarized in Algorithm \ref{alg:KDSM}.
+\begin{algorithm}
+\caption{Kernel denoising score matching.}
+\label{alg:KDSM}
+\begin{algorithmic}[1]
+    \Require Training set ${\cal D}$, $m$~--- number of Fourier features,
+    $n_z$~--- number of samples to estimate normalization constant,
+    initial regularization parameter $\lambda$
+    \State Fit $q_0({\bf x})$ to the given data set.
+    \While{not stopping condition}
+        \For{mini-batches ${\cal D}_t, {\cal D}_v \in {\cal D}$}
+            \State Compute random Fourier approximation $f_m^*$ using equation \eqref{eq:rff_f} on ${\cal D}_t$.
+            \State Compute ordinary score matching loss on validation
+            \[
+                \hat{J}_{val}(\lambda, \sigma, {\bm p}_k) =
+                \frac{1}{|{\cal D}_v|}\left[
+                    {\bf 1}^{\top}\partial^2 \bm{\Phi}_{v}\bm{b}_t +
+                    \frac{1}{2}\bm{b}_t^{\top}\partial \bm{\Phi}_{v}^{\top}
+                    \partial \bm{\Phi}_{v}\bm{b}_t +
+                    \bm{b}_t^{\top}\partial \bm{\Phi}_{v}^{\top} \nabla\log q_0({\bf x})
+                \right]
+            \]
+            \State Do gradient step over hyper-parameters ($\lambda$, $\sigma$, ${\bm p}_k$)
+        \EndFor
+    \EndWhile
+    \State Compute $f_m^* = \bm{\phi}(\cdot)^{\top}\bm{b}_{\cal D}$
+    using full dataset ${\cal D}$
+    \State Compute normalization constant approximation $\hat{Z}$ via importance sampling
+    \[
+        \hat{Z} = \frac{1}{n_z}\sum_{i = 1}^{n_z}\frac{f_m^*({\bf x}_i)}{q_0({\bf x}_i)},
+        \quad {\bf x}_i \sim q_0({\bf x})
+    \]
+\end{algorithmic}
+\Return $\log p_f = f_m^* - \hat{Z}$
+\end{algorithm}
+
+
+The total complexity of the proposed approach is $O(m^3 + nm^2 + nmd)$,
+where $O(nmd)$ operations are required generate random features,
+$O(nm^2)$ is to compute feature matrix ${\bm H}$
+and $O(m^3)$ corresponds to the matrix inversion which can be reduced to
+$O(m^2)$ in some cases by using iterative methods for solving systems of linear equations.
+
+Now, let us provide the bounds on the error of the approximation of the proposed approach.
+Let us introduce the derivatives of the exact kernel matrix
+\[
+    \partial^p\partial^q {\bm K}_{(a - 1)d + i, (b - 1)d + j} = \partial^p_i\partial^q_{d + j}k({\bf x}_a, {\bf x}_b),
+    \quad
+    p, q \in \mathbb{N}_+.
+\]
+We also denote the derivatives of the random feature vector as
+\[
+   \partial^p\bm{\phi} = \begin{pmatrix}
+        \partial_1^p\bm{\phi}({\bf w}^{\top}{\bf x}_1 + b) &
+        \cdots &
+        \partial^p_d\bm{\phi}({\bf w}^{\top}{\bf x}_n + b)
+   \end{pmatrix}^\top.
+\]
+The error bounds for score matching with RFF is given by the following theorem.
+\begin{theorem}
+    Let $\delta \in (0, 1)$, $\varepsilon > 0$, then for
+    $n \geq \frac{8}{3\varepsilon^2} \log\frac{m}{\delta}$ and assuming that
+    ${\bf D}_1 = \mathbb{E}_{\bf w}{\rm tr}[\partial\bm{\phi}\partial\bm{\phi}^{\top}]
+    \partial\bm{\phi}\partial\bm{\phi}^{\top} < \infty$, ${\bf D}_2 =
+    \mathbb{E}_{\bf w}{\rm tr}[\partial^2\bm{\phi}\partial^2\bm{\phi}^{\top}]\partial\bm{\phi}
+    \partial\bm{\phi}^{\top} < \infty$,
+    we have that with probability at least $(1 - \delta)$ the following upper bound
+    on distance between an averaged RFF score matching solution $f_{n, m}^*$
+    and exact kernel solution $f_n^*$ holds
+    \begin{align*}
+        \mathbb{E}_{{\bf x}, {\bf w}}(f_{n, m}^*({\bf x}) - f_n^*({\bf x}))^2 \leq
+        \frac{2}{\lambda^2 n^2 m^2}\left[
+            \vphantom{\partial\partial {\bm K}^{\frac{1}{2}}} \right .
+            & m\|\partial\partial {\bm K}^{\frac{1}{2}}(\partial\partial {\bm K} + \lambda n{\bf I})^{-1}\partial\partial^2 {\bm K}{\bf 1}\|^2 +\nonumber \\
+            &m{\bf 1}^{\top}\partial^2\partial^2{\bm K}{\bf 1} +
+            (1 + \varepsilon m)\|{\bf D}_2^{\frac{1}{2}}{\bf 1}\|^2 + \nonumber \\
+            &\left . (1 + \varepsilon m)\|{\bf D}_1^{\frac{1}{2}}(\partial\partial {\bm K} + \lambda n {\bf I})^{-1}\partial\partial^2 {\bm K}{\bf 1}\|^2
+        \right ].
+    \end{align*}
+\end{theorem}
+The proof of the theorem is given in \ref{sec:error_bound_proof}.
+
+\subsubsection{Discussion}
+
+While RFF kernel approximation admits computationally efficient solution of score matching,
+the convergence properties remains an open question.
+Using results from \cite{Gretton2013} the convergence can be established only in the
+RKHS that corresponds to the approximate kernel.
+So we have the following relation
+\[
+    J(p_0\| p_{\lambda, n, m}) \to \inf_{p \in \Tilde{{\cal P}}}J(p_0\| p)
+    \quad
+    \lambda \to 0,~\lambda n \to \infty,~n \to \infty,
+\]
+where $p_{\lambda, n, m}$ is the density obtained using $m$ features and
+$\Tilde{{\cal P}}$ is an exponential family with sufficient statistic
+$\phi({\bm W}{\bf x} + {\bm b})$.
+To upper bound the error of the approximation we
+can consider the following inequality
+\[
+    \|f_{\lambda, n, m} - f_0\| \leq
+        \|f_{\lambda, n, m} - f_{\lambda, m}\| +
+        \|f_{\lambda, m} - f_{\lambda}\| +
+        \|f_{\lambda} - f_0\|,
+\]
+where $f_{\lambda}$ minimizes \eqref{eq:sm_kernel} and
+$f_{\lambda, n}$ is a solution of a finite sample version of \eqref{eq:sm_kernel},
+$\|\cdot\|$ is a norm in $L^2({\mathbb{R}^d}, p_0)$.
+$\|f_{\lambda,n, m} - f_{\lambda, m}\|$ includes the term $\|\hat{\xi}_m - \hat{\xi}\| = O(m^{-\frac{1}{2}})$ that can obtained using concentration lemma from
+\cite{sutherland2017efficient} under additional assumption on the boundness
+of the derivatives of the approximate kernel.
+This implies that we should potentially use $O(n)$ features to obtain the same
+convergence rates as in the case of exact solution.
+To reduce the lower bounds on number of features
+we need to provide refined analysis in a way similar to
+\cite{aless2016generalization, li2018unified} in the future study.
+
+In the case of Denoising Score Matching the estimated density will converge to the
+$p^* * p_{\varepsilon}$, where $p^* = \inf_{p \in \Tilde{{\cal P}}}J(p_0\| p)$
+is the density from $\Tilde{\mathcal{P}}$ closest to $p_0$.
+So, on one hand the noise variance should be as small as possible.
+On the other hand, the Wasserstein distance
+between the approximation and the true density for the
+Denoising Score Matching can be upper bounded as follows
+\[
+    W(p_0, p) \leq
+    \mathbb{E}[\|{\bm \varepsilon}\|^2]^{\frac{1}{2}} +
+    \tilde{C}\sqrt{J(p_0 * p_{\varepsilon}, p_{\lambda, n, m} * p_{\varepsilon})},
+\]
+where $\mathbb{E}[\|{\bm \varepsilon}\|^2] = n\sigma^2$.
+The second term takes large value for small noise levels (due to different supports
+of the approximate density and the true density)
+and smaller values for large noise values.
+So the choice of $\sigma$ is a trade-off between estimator stability and
+how close it is to the unknown density function $p_0$.
+
+
+\subsection{Results}
+\label{chap:experiments}
+\subsubsection{Experimental setup}
+In all our experiments we used RBF kernel with diagonal covariance matrix,
+the noise was assumed to be isotropic Gaussian (though in general
+we can use arbitrary noise covariance matrix).
+
+We compare the proposed approach (DSM RFF),
+ordinary score matching with RFF (SM RFF),
+exact kernel solution \eqref{eq:sm_kernel} (Exact) and
+its Nystr\"om version with subsampled basis \cite{sutherland2017efficient} (Nystr\"om).
+We used original implementations of this model from \cite{GrettonGit}.
+
+The comparison is conducted on two types of data: artificially generated 2D densities
+and datasets from the UCI repository \cite{UCI}
+(the particular choice of data is motivated by previous research on kernel exponential family
+\cite{sutherland2017efficient, Gretton2015, GrettonDeep}):
+\begin{enumerate}
+    \item Synthetic data generated from the following densities: a mixture of Gaussians, Uniform, Mixture on Uniforms, Cosine, Funnel, Banana, Ring, Mixture of Rings.
+    \item RedWine, WhiteWine, MiniBoone.
+\end{enumerate}
+The Exact kernel model was not compared on MiniBoone dataset
+because it's too computationally expensive.
+
+To estimate the quality of models the following metrics were used:
+\begin{enumerate}
+    \item Log-likelihood (higher is better).
+    It requires the normalization constant which can only be approximated, so
+    the log-likelihood tends to be overestimated \cite{GrettonDeep}.
+    \item Fisher divergence (lower is better).
+    It requires true log-density gradient to be known and hence could be estimated only for
+    artificial data, moreover, for uniform settings could be computed only on the support of
+    true density.
+    Alternatively, score-matching could be used, but scores for different models
+    are not comparable in general.
+    \item Finite-Set Stein Discrepancy (FSSD) goodness of fit test \cite{FSSD, GOF} with $0.05$
+    significance level.
+    We used Gaussian kernel, and its lengthscale was chosen to be median over
+    pairwise distances between samples in order to avoid optimization over test points for the
+    particular model, otherwise, we can not compare models.
+    FSSD statistic almost surely equals to zero if and only if model density and $p_0$
+    coincide.
+    \item Wasserstein distance.
+    In order to estimate this quantity, we used Metropolis Adjusted Langevin Algorithm (MALA)
+    \cite{MALA} to draw samples from the model densities.
+    We used step-size $0.1$, chain length was $10^4$ with $5\cdot 10^3$ burn-in.
+\end{enumerate}
+
+\subsection{Results}
+
+We start by considering an approximate denoising approach (see \ref{sec:Taylor} for derivation)
+to figure out if there is a benefit from the convolution with noise.
+To accomplish this we construct illustrative experiment with $300$ RFF
+features for Gaussian mixture.
+We used multivariate Gaussian distribution for $q_0$
+and the training set size was $10^3$.
+The results are presented on Fig.~\ref{fig:demo},
+from which it is clear that noisy approach better estimates ground truth in between components
+region even with the presence of small noise
+Also note the that there are less oscillations when we add noise to the data.
+\begin{figure}[!ht]
+  \centering
+  \begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{figures/score_matching/exps/taylor_MoG_true.png}
+    \captionsetup{justification=centering}
+    \caption{Ground truth\\ \hfill}
+    \label{sfig:MoGtrue}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{figures/score_matching/exps/taylor_MoG.png}
+    \captionsetup{justification=centering}
+    \caption{RFF, no noise, $SM~=~-0.68$}
+    \label{sfig:MoGrff}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{figures/score_matching/exps/taylor_MoG_noise_1.png}
+    \captionsetup{justification=centering}
+    \caption{RFF+noise, $SM~=~-0.99$}
+    \label{sfig:MoGnoise}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{figures/score_matching/exps/MOG_rff.png}
+    \captionsetup{justification=centering}
+    \caption{RFF, no noise, wide kernel, $SM~=~-0.49$}
+    \label{sfig:MoGrff_1}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{figures/score_matching/exps/MOG_noise.png}
+    \captionsetup{justification=centering}
+    \caption{RFF+noise, wide kernel, $SM~=~-0.67$}
+    \label{sfig:MoGnoise1}
+  \end{subfigure}
+  \caption{Comparison of score-matching with and without noise,
+    noise variance is
+    $\sigma = 5\cdot10^{-4}$.
+    We clip values of log-density that less then $-10$.
+  }
+  \label{fig:demo}
+\end{figure}
+
+The next step is to compare the proposed algorithm to other approaches on synthetic 2D data
+and datassets from UCI.
+In this case we used $512$ Random Fourier Features.
+As the base density $q_0$ we used mixture of Gaussians.
+As in the previous example a relatively small sample size was used.
+Our models were trained for $60$ iterations using Adam optimizer with $0.1$ learning rate,
+$512$ features were used.
+
+
+% The results for Cosine and mixture of uniforms are presented
+% in Figure~\ref{fig:2d_1000} (other results can be find in \ref{sec:C}).
+
+
+For cosine data the form of distribution estimated via DSM RFF is much closer
+to the real one.
+However, for the mixture of uniforms it fails to correctly estimate weights
+of the components.
+In both of this densities, we observe model misspecification in the case of SM RFF
+because all other 2D densities have full space support.
+For the rest distributions there is no significant visual difference.
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}[b]{\textwidth}
+      \includegraphics[width=\textwidth]{figures/score_matching/2D/Cosine1000.png}
+      \caption{Cosine}
+      \label{sfig:1000Cos}
+    \end{subfigure}
+    \begin{subfigure}[b]{\textwidth}
+      \includegraphics[width=\textwidth]{figures/score_matching/2D/Mixture1000.png}
+      \caption{Mixture of uniforms}
+      \label{sfig:1000Rings}
+    \end{subfigure}
+    \caption{Density estimates using DSM RFF (middle column) and SM RFF (right column).
+    The ground truth density is in the first column.
+    }
+    \label{fig:2d_1000}
+\end{figure}
+
+These experiments showed that denoising score matching with RFF
+in general works better for distributions with bounded support.
+For the multimodal distributions it could fail to correctly estimate weights of
+components or oversmooth the areas between components.
+\begin{figure}[!ht]
+  \centering
+  \begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{figures/score_matching/loss/lossUniform.png}
+    \caption{Uniform}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{figures/score_matching/loss/lossFunnel.png}
+    \caption{Funnel}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{figures/score_matching/loss/lossRings.png}
+    \caption{Two Rings}
+  \end{subfigure}
+  \caption{Dependence of loss on the regularization parameter $\lambda$ (y axis) and noise $\sigma$ (x axis).}
+  \label{fig:lossdemo}
+\end{figure}
+Another observation about the approach is that in some cases it tends to choose
+large noise variance.
+In Fig.~\ref{fig:lossdemo} we visualize the dependence of the loss on
+the regularization parameter and noise variance for several 2D distributions.
+Interestingly, for "good" distributions
+(like Funnel, that have full space support and one mode) the loss surface has wide
+minimum w.r.t regularization and noise variance.
+For multimodal distributions the loss surface has narrower minimum.
+For uniform distribution (which differs from other that it has bounded support)
+the minimum w.r.t noise variance is narrow but it is also separated from zero.
+This indicates the need for the noise in such cases.
+
+
+% In order to compare with exact kernel models, let us consider uniform base model, $10^4$ sample size and $512$ features (in the case of Nystr\"om estimator it is better to say components), the choice of relatively small sample size is caused by $O(n^2d^2)$ space complexity of the full kernel approach. In order to compare results for these model random search of hyperparameters was used. From the above experiments, the densities of interest are cosine, uniform, ring and the mixture of rings. Quantitative results are presented in the table~\ref{tab:RFFvsGretton}. While exact kernel models outperform in three of four cases in terms of Fisher divergence, for uniform distribution according to the $p$-value of FSSD test the hypothesis that $p_f = p_0$ is rejected for both exact kernel and Nystr\"om estimators. However, DSM RFF is comparable with them in Wasserstein distance.
+
+% \begin{table}[!ht]
+%     \centering
+%     \begin{tabular}{llrrrrr}
+% \toprule
+% Distribution &           Model &  F$_{train}$ &  F$_{test}$ &   FSSD &  p-value & W1 \\
+% \midrule
+%     \multirow{2}{*}{Cosine}
+%             &       DSM RFF &          6.783 &         6.458 &  0.040 &    0.300 &  \textbf{0.211} \\
+%             &       SM RFF &          7. &         6.689 &  0.085 &    0.251 &  0.232 \\
+%             &       Exact &          \textbf{3.656} &         \textbf{3.558} &  0.260 &    0.148 &  \textbf{0.17} \\
+%             &       Nystr\"om &          \textbf{3.658} &         \textbf{3.561} &  0.261 &    0.147 &  0.35 \\
+%             \hline
+%     \multirow{2}{*}{Uniform}
+%             &       DSM RFF &          1. &         1.171 &  0.130 &    0.116 &  \textbf{0.059} \\
+%             &       SM RFF &         1.062 &         1.308 &  0.138 &    0.122 &  0.141 \\
+%             &       Exact &          \textbf{0.7} &         \textbf{0.811} &  0.338 &    0.004 &  0.513 \\
+%             &  Nystr\"{o}m &          \textbf{0.7} &         \textbf{0.81} &  0.342 &    0.004 &  \textbf{0.065} \\
+%             \hline
+%     \multirow{2}{*}{Ring}
+%             &       DSM RFF &          \textbf{0.394} &         \textbf{0.392} & -1.899 &    0.908 &  \textbf{0.06} \\
+%             &            SM RFF &          \textbf{0.436} &         \textbf{0.430} & -1.805 &    0.901 &  0.139 \\
+%             &                Exact &          0.998 &         0.883 &  0.841 &    0.240 &  \textbf{0.55} \\
+%             &  Nystr\"{o}m &          0.998 &         0.884 &  0.827 &    0.241 &  0.688 \\
+%             \hline
+%     \multirow{2}{*}{Rings}
+%             &       DSM RFF &          \textbf{2.027} &         \textbf{1.97} & -0.466 &    0.703 &  \textbf{0.42} \\
+%             &            SM RFF &          3.115 &         2.856 & -0.863 &    0.872 &  0.436 \\
+%             &                Exact &          \textbf{2.352} &         \textbf{2.376} & -0.223 &    0.512 &  \textbf{0.394} \\
+%             &  Nystr\"{o}m &          2.353 &         2.378 & -0.223 &    0.512 &  0.438 \\
+% \bottomrule
+% \end{tabular}
+%     \caption{Comparison of score matching approached with exact kernel solution and its Nystr\"{o}m-type approximation on synthetic data \cite{Gretton2013, sutherland2017efficient}.}
+%     \label{tab:RFFvsGretton}
+% \end{table}
+
+
+In Figure~\ref{fig:metrics} we plot all the metrics for all data sets.
+For each dataset each metric was normalized across methods to have unit norm.
+This was done only for better visualization.
+The original values are given in \ref{sec:B}.
+The figure illustrates the mean value of the metrics and corresponding variance
+calculated across $10$ runs.
+From the figure we can see, that w.r.t. almost all metrics (except the log-likelihood)
+the proposed approach shows better or comparable results in many cases.
+Actually, the Wasserstein distance is smaller for DSM RFF for all data sets.
+We can also see, that SM RFF tends to have larger variance than its noisy version.
+
+In Table~\ref{tab:metrics} we provide results for the datasets from the UCI repository
+as well as the training time.
+The MiniBoone dataset is large and the Nystr\"om-based implementation
+could not fit into memory, so we had to train the model using only a subset of
+$15000$ samples.
+Other methods were trained using the whole data set.
+To fairly compare the training time the experiments were conducted on
+Intel(R) Core(TM) i7-7820X CPU @ 3.60GHz with 64Gb RAM.
+We can see that the proposed approach is much faster than the implementation
+of the Nystr\"om based approach.
+
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{figures/score_matching/exps/metrics.pdf}
+  \caption{Metrics on different datasets for different methods.
+           For each dataset each metric was normalized across methods
+           to have unit norm.
+           We did it only for better visualization.}
+  \label{fig:metrics}
+\end{figure}
+
+\begin{table}
+\centering
+\caption{Metrics for the data sets from UCI repository.}
+\label{tab:metrics}
+  \footnotesize
+  \begin{tabular}{llrrrrr}
+    \toprule
+    Data set & Model & Log-likelihood & FSSD &
+    \shortstack{Wasserstein \\ distance} & time, s \\
+    \midrule
+    RedWine & DSM RFF     & -11.64 & 0.38 & 0.24 & 62 \\
+            & SM RFF      & -11.72 & 0.43 & 0.25 & 61 \\
+            & Nystr\"om   & -17.23 & 0.11 & 0.73 & $0.2 \times 10^4$ \\
+    WhiteWine & DSM RFF   & -12.81 & 0.57 & 0.33 & 180 \\
+              & SM RFF    & -12.22 & 0.53 & 0.11 & 180 \\
+              & Nystr\"om & -17.79 & 0.23 & 0.67 & $1 \times 10^4$ \\
+    MiniBoone & DSM RFF   & -93.11 & 307.67 & 0.49 & $0.5 \times 10^4$ \\
+              & SM RFF    & -4580.20 & $2 \times 10^8$ & 0.48 & $0.5 \times 10^4$ \\
+              & Nystr\"om & -46.06 & 0.02 &  0.75 & $0.6 \times 10^4$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+
+
+

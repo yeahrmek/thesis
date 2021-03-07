@@ -1,0 +1,424 @@
+%% ----------------------------------------------------------------
+%% Thesis.tex -- MAIN FILE (the one that you compile with LaTeX)
+%% ----------------------------------------------------------------
+
+% Set up the document
+\documentclass[a4paper, 11pt, oneside]{Thesis}  % Use the "Thesis" style, based on the ECS Thesis style by Steve Gunn
+\graphicspath{figures/}  % Location of the graphics files (set up for graphics to be in PDF format)
+
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+\usepackage{changepage}
+
+\usepackage[table,xcdraw]{xcolor}
+
+% Include any extra LaTeX packages required
+\usepackage{natbib}  % Use the "Natbib" style for the references in the Bibliography
+\setcitestyle{authoryear,round,citesep={;},aysep={,},yysep={;}}
+
+\usepackage{bm}  % Allows "\bvec{}" and "\buvec{}" for "blackboard" style bold vectors in maths
+\usepackage{xfrac}
+\usepackage{tabularx}
+
+
+\usepackage{hyperref}
+\hypersetup{urlcolor=blue, colorlinks=true}  % Colours hyperlinks in blue, but this can be distracting if there are many links.
+
+\newcommand{\fig}[1]{Figure~\ref{fig:#1}}
+\newcommand{\sect}[1]{Section~\ref{sect:#1}}
+\newcommand{\chapt}[1]{Chapter~\ref{chapt:#1}}
+\newcommand{\tab}[1]{Table~\ref{tab:#1}}
+\newcommand{\alg}[1]{Algorithm~\ref{alg:#1}}
+\newcommand{\eq}[1]{(\eqref{eq:#1})}
+
+\usepackage{todonotes}
+% \usepackage{gensymb}
+\usepackage{enumitem}
+
+% Attempt to make hyperref and algorithmic work together better:
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+%\newcommand{\todo}[1][]{\@latex@warning{TODO #1}\fbox{TODO\dots}}
+
+
+% \usepackage{bbm}
+\usepackage{multirow}
+\usepackage{subcaption}
+\usepackage{graphicx}
+\usepackage{mathtools}
+% \usepackage{algorithmic}
+% \usepackage{algorithmicx}
+% \usepackage{algorithm2e}
+
+% \usepackage{nomencl}
+% \makenomenclature
+% \setlength\nomlabelwidth{3.2cm}
+
+
+% \renewcommand{\nomname}{List of Symbols and Abbreviations}
+% \renewcommand{\nompreamble}{
+%     Scalar numbers are denoted by unbolded letters ($x$),
+%     bold $\mathbf{x}$ represents a vector and $x_i$ is an $i$-th element of the vector,
+%     bold capital letter $\mathbf{X}$ represents a matrix,
+%     while calligaphic capital $\mathcal{X}$ is typically used
+%     to denote a tensor.
+% }
+% \usepackage{etoolbox}
+% \renewcommand\nomgroup[1]{%
+%   \item[
+%   \ifstrequal{#1}{A}{\underline{Symbol}}{}%
+% ]\underline{Meaning}}
+
+
+
+\newcommand{\onot}{\mathcal{O}} % O-notation
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\T}{\top}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\cov}{cov}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+
+
+\def\mystrut{\rule[-.3\baselineskip]{0pt}{0.5\baselineskip}}
+
+\input{colors}
+
+%% ----------------------------------------------------------------
+\begin{document}
+\frontmatter      % Begin Roman style (i, ii, iii, iv...) page numbering
+
+% Set up the Title Page
+\title  {GAUSSIAN PROCESS MODELS FOR LARGE-SCALE PROBLEMS}
+\authors  {\texorpdfstring
+            {\href{y.kapushev@skoltech.ru}{Yermek Kapushev}}
+            {Yermek Kapushev}
+            }
+\addresses  {\groupname\\\deptname\\\univname}  % Do not change this here, instead these must be set in the "Thesis.cls" file, please look through it instead
+\date       {\today}
+\subject    {}
+\keywords   {}
+
+\maketitle
+
+%% ----------------------------------------------------------------
+
+\setstretch{1.3}  % It is better to have smaller font and larger line spacing than the other way round
+
+% Define the page headers using the FancyHdr package and set up for one-sided printing
+\fancyhead{}  % Clears all page headers and footers
+\rhead{\thepage}  % Sets the right side header to show the page number
+\lhead{}  % Clears the left side page header
+
+\pagestyle{fancy}  % Finally, use the "fancy" page style to implement the FancyHdr headers
+
+%% ----------------------------------------------------------------
+% Declaration Page required for the Thesis, your institution may give you a different text to place here
+%\Declaration{
+
+%\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
+
+%I, AUTHOR NAME, declare that this thesis titled, `THESIS TITLE' and the work presented in it are my own. I confirm that:
+
+%\begin{itemize}
+%\item[\tiny{$\blacksquare$}] This work was done wholly or mainly while in candidature for a research degree at this University.
+
+%\item[\tiny{$\blacksquare$}] Where any part of this thesis has previously been submitted for a degree or any other qualification at this University or any other institution, this has been clearly stated.
+
+%\item[\tiny{$\blacksquare$}] Where I have consulted the published work of others, this is always clearly attributed.
+
+%\item[\tiny{$\blacksquare$}] Where I have quoted from the work of others, the source is always given. With the exception of such quotations, this thesis is entirely my own work.
+
+%\item[\tiny{$\blacksquare$}] I have acknowledged all main sources of help.
+
+%\item[\tiny{$\blacksquare$}] Where the thesis is based on work done by myself jointly with others, I have madbe clear exactly what was done by others and what I have contributed myself.
+%\\
+%\end{itemize}
+
+
+%Signed:\\
+%\rule[1em]{25em}{0.5pt}  % This prints a line for the signature
+
+%Date:\\
+%\rule[1em]{25em}{0.5pt}  % This prints a line to write the date
+%}
+%\clearpage  % Declaration ended, now start a new page
+
+\Declaration{
+\begin{adjustwidth}{2cm}{2cm}
+I hereby declare that the work presented in this thesis was carried out by myself at
+Skolkovo Institute of Science and Technology, Moscow, except where due acknowledgement is made,
+and has not been submitted for any other degree.
+
+\begin{flushright}
+Yermek Kapushev \\
+Associate Professor Evgeny Burnaev
+\end{flushright}
+\end{adjustwidth}
+}
+\clearpage
+
+%% ----------------------------------------------------------------
+% The "Funny Quote Page"
+%\pagestyle{empty}  % No headers or footers for the following pages
+
+%\null\vfill
+% Now comes the "Funny Quote", written in italics
+%\textit{``You're just too good to be true \\
+%Can't take my eyes off you.''}
+
+%\begin{flushright}
+%Bob Crewe, Bob Gaudio
+%\end{flushright}
+
+%\vfill\vfill\vfill\vfill\vfill\vfill\null
+%\clearpage  % Funny Quote page ended, start a new page
+%% ----------------------------------------------------------------
+
+% The Abstract Page
+% \addtotoc{Abstract}
+\input{include/abstract}
+\input{include/publications}
+% \input{Chapters/conferences}
+
+
+\clearpage  % Abstract ended, start a new page
+%% ----------------------------------------------------------------
+
+% \input{Chapters/acknowledgements.tex}
+\setstretch{1.3}  % Reset the line-spacing to 1.3 for body text (if it has changed)
+
+% The Acknowledgements page, for thanking everyone
+%\acknowledgements{
+%\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
+
+%The acknowledgements and the people to thank go here, don't forget to include your project advisor\ldots
+
+%}
+%\clearpage  % End of the Acknowledgements
+%% ----------------------------------------------------------------
+
+\pagestyle{fancy}  %The page style headers have been "empty" all this time, now use the "fancy" headers as defined before to bring them back
+
+% \acknowledgements{Thesis}
+
+%% ----------------------------------------------------------------
+% \lhead{\emph{Contents}}  % Set the left side page header to "Contents"
+\tableofcontents  % Write out the Table of Contents
+
+%% ----------------------------------------------------------------
+% \lhead{\emph{List of Figures}}  % Set the left side page header to "List if Figures"
+\listoffigures  % Write out the List of Figures
+
+% ----------------------------------------------------------------
+% \lhead{\emph{List of Tables}}  % Set the left side page header to "List of Tables"
+\listoftables  % Write out the List of Tables
+
+%% ----------------------------------------------------------------
+\setstretch{1.5}  % Set the line spacing to 1.5, this makes the following tables easier to read
+
+\clearpage  % Start a new page
+%\lhead{\emph{Symbols}}%~and~Abbreviations}}  % Set the left side page header to "Abbreviations"
+\listofsymbols{lp{0.77\linewidth}}  % Include a list of Abbreviations (a table of two columns)
+{
+\multicolumn{2}{p\linewidth}{
+Scalar numbers are denoted by unbolded letters ($x$),
+bold $\mathbf{x}$ represents a vector and $x_i$ is an $i$-th element of the vector,
+bold capital letter $\mathbf{X}$ represents a matrix,
+while calligaphic capital $\mathcal{X}$ is typically used
+to denote a tensor.} \\
+\\
+\underline{Symbol} & \underline{Meaning} \\
+$\lvert \mathbf{K} \rvert$ &
+determinant of $\mathbf{K}$ matrix
+\\
+$\langle f, g \rangle_{\mathcal{H}}$ &
+RKHS inner product
+\\
+$\|f\|_{\mathcal{H}}$ &
+RKHS norm
+\\
+$\nabla$ or $\nabla_{\mathbf{x}}$ & partial derivatives w.r.t $\mathbf{x}$
+\\
+$\Delta$ & trace of the (Hessian) matrix of second derivatives
+\\
+$\partial_i^k f(\mathbf{x})$ & $k$-th order partial derivative of $f(\mathbf{x})$ w.r.t. $i$-th input variable $x_i$
+\\
+$\partial^{\mathbf{p}} f(\mathbf{x})$ & higher order partial derivative
+$\partial^{\mathbf{p}} f(\mathbf{x}) = \frac{\partial^{p_1 + \cdots + p_d}}{\partial x_1^{p_1}\cdots\partial x_d^{p_d}}f(\mathbf{x})$,
+where $\mathbf{p}$ is a multi-index
+\\
+$\partial^{\mathbf{p}, \mathbf{q}} k(\mathbf{x}, \mathbf{x}')$ & 
+higher order partial derivative of the kernel function, where multi-index $\mathbf{p}$ corresponds
+to the derivatives w.r.t. the first argument of the kernel function and
+$\mathbf{q}$ corresponds to the second argument
+\\
+$\mathcal{D}$ & 
+Data set $\mathcal{D} = (\mathbf{X}, \mathbf{y}) = \{\mathbf{x}_i ,y_i\}_{i=1}^N$
+\\
+$d$ & 
+dimension of input vectors $\mathbf{x}_i$
+\\
+$\mathbb{E}$ or $\mathbb{E}_{p(x)}\left [ f(x) \right ]$ & 
+expectation of $f(x)$ when $x \sim p(x)$
+\\
+$\mathbf{1}$ or $\mathbf{1}_n$ & 
+vector of all 1's (of length $n$)
+\\
+$\mathbf{I}$ or $\mathbf{I}_n$ & 
+identity matrix (of length $n$)
+\\
+$\mathcal{N}(\boldsymbol{\mu}, \Sigma)$ & 
+Gaussian distribution with mean vector $\boldsymbol{\mu}$
+and the covariance matrix $\Sigma$
+\\
+$\mathcal{GP}$ & 
+Gaussian Process
+\\
+$k(\mathbf{x}, \mathbf{x}')$ & 
+covariance or kernel function evaluated at points $\mathbf{x}$ and $\mathbf{x}'$
+\\
+$\mathbf{K}$ or $k(\mathbf{X}, \mathbf{X})$ & 
+$N \times N$ covariance matrix with elements $k(\mathbf{x}_i, \mathbf{x}_j), i, j = 1, \ldots, N$
+\\
+$\mathbf{K}_{\mathbf{y}}$ & 
+covariance or kernel matrix for noisy observations $\mathbf{y}$;
+for independent homoscedastic noise $\mathbf{K}_y = \mathbf{K} + \sigma_{noise}^2 \mathbf{I}$
+\\
+$\mathbf{k}$ or $k(\mathbf{X}, \mathbf{x}_*)$ & 
+vector of kernel values between test point $\mathbf{x}_*$
+and the training points $\mathbf{X}$
+\\
+$N$ & 
+number of training points
+\\
+$D$ & 
+number of random features
+\\
+$\mathcal{O}(\cdot)$ & 
+big O notation
+\\
+$\phi(\mathbf{x}_i)$ & 
+feature map of input $\mathbf{x}_i$
+\\
+$\boldsymbol{\Phi}$ & 
+matrix where each row is a feature map vector of input variable $\mathbf{x}_i$, $i = 1, \ldots, N$
+\\
+$\partial\boldsymbol{\Phi}$ and $\partial^2\boldsymbol{\Phi}$ & 
+matrix of the first and second derivatives of the feature map vectors correspondingly
+\\
+GP and GPR & 
+Gaussian Process and Gaussian Process Regression
+\\
+MSE and RMSE & 
+Mean squared error and root mean squared error
+\\
+MLE & 
+Maximum likelihood estimation
+\\
+DoE & 
+Design of Experiment
+\\
+RFF & 
+Random Fourier Features
+\\
+RKHS & 
+Reproducing Kernel Hilbert Space
+\\
+RBF & 
+Radial basis functions
+\\
+TT & 
+Tensor train
+\\
+SLAM & 
+Simultaneous localization and mapping
+
+}
+
+%% ----------------------------------------------------------------
+%\clearpage  % Start a new page
+%\lhead{\emph{Physical Constants}}  % Set the left side page header to "Physical Constants"
+%\listofconstants{lrcl}  % Include a list of Physical Constants (a four column table)
+%{
+% Constant Name & Symbol & = & Constant Value (with units) \\
+%Speed of Light & $c$ & $=$ & $2.997\ 924\ 58\times10^{8}\ \mbox{ms}^{-\mbox{s}}$ (exact)\\
+
+%}
+
+%% ----------------------------------------------------------------
+%\clearpage  %Start a new page
+%\lhead{\emph{Symbols}}  % Set the left side page header to "Symbols"
+%\listofnomenclature{lll}  % Include a list of Symbols (a three column table)
+%{
+% symbol & name & unit \\
+%$a$ & distance & m \\
+%$P$ & power & W (Js$^{-1}$) \\
+%& & \\ % Gap to separate the Roman symbols from the Greek
+%$\omega$ & angular frequency & rads$^{-1}$ \\
+%}
+%% ----------------------------------------------------------------
+% End of the pre-able, contents and lists of things
+% Begin the Dedication page
+
+\setstretch{1.3}  % Return the line spacing back to 1.3
+
+%\pagestyle{empty}  % Page style needs to be empty for this page
+%\dedicatory{For/Dedicated to/To my\ldots}
+
+\addtocontents{toc}{\vspace{2em}}  % Add a gap in the Contents, for aesthetics
+
+
+%% ----------------------------------------------------------------
+\mainmatter	  % Begin normal, numeric (1,2,3...) page numbering
+\pagestyle{fancy}  % Return the page headers back to the "fancy" style
+
+% Include the chapters of the thesis, as separate files
+% Just uncomment the lines as you write the chapters
+
+
+% \input{include/list_of_symbols}
+
+\input{include/intro.tex}
+
+\input{include/background.tex}
+
+\input{include/gp_on_grid.tex}
+
+\input{include/quadrature_based_features.tex}
+
+\input{include/applications.tex}
+
+\input{include/tensor_completion.tex}
+
+\input{include/score_matching.tex}
+
+\input{include/SLAM.tex}
+
+\input{include/conclusion.tex}
+
+
+%% ----------------------------------------------------------------
+% Now begin the Appendices, including them as separate files
+
+\addtocontents{toc}{\vspace{2em}} % Add a gap in the Contents, for aesthetics
+
+\appendix % Cue to tell LaTeX that the following 'chapters' are Appendices
+
+\input{include/appendix_a}
+\input{include/appendix_b}
+
+\addtocontents{toc}{\vspace{2em}}  % Add a gap in the Contents, for aesthetics
+\backmatter
+
+%% ----------------------------------------------------------------
+\label{Bibliography}
+\lhead{\emph{Bibliography}}  % Change the left side page header to "Bibliography"
+\bibliographystyle{icml2020}  % Use the "unsrtnat" BibTeX style for formatting the Bibliography
+\bibliography{Bibliography}  % The references (bibliography) information are stored in the file named "Bibliography.bib"
+
+\end{document}  % The End
+%% ----------------------------------------------------------------
