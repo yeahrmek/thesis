@@ -555,7 +555,7 @@ We reimplemented code for the paper to the best of our knowledge as it is not op
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/quadratures/kernel_acc}
-\caption{Kernel approximation error across three kernels and 6 datasets.Lower is better. The x-axis represents the factor to which we extend the original feature space, $n = \frac{D}{2(d+1)+1}$, where $d$ is the dimensionality of the original feature space, $D$ is the dimensionality of the new feature space.}
+\caption{Kernel approximation error across three kernels and 6 datasets. Lower is better. The x-axis represents the factor to which we extend the original feature space, $n = \frac{D}{2(d+1)+1}$, where $d$ is the dimensionality of the original feature space, $D$ is the dimensionality of the new feature space.}
 \label{fig:KA}
 \end{figure*}
 To measure kernel approximation quality we use relative error in Frobenius norm
@@ -608,6 +608,30 @@ QMC method almost always coincides with RFF except for arc-cosine 0 kernel. It p
 
 The empirical results in Figure \ref{fig:KA} support our hypothesis about the advantages of $\mathbf{SR}$ quadratures applied to kernel approximation compared to SOTA methods.
 With an exception of a couple of cases: (Arc-cosine 0, Powerplant) and (Gaussian, USPS), our method displays clear exceeding performance.
+
+We also study the derived error bounds, Proposition~\ref{prop:error_probability_bound}, empirically.
+While we do not know the values of the constants in the proposition,
+the asymptotic for the number of features required to obtain $\varepsilon$-accuracy
+of the kernel approximation is $\mathcal{O}(1 / \varepsilon^2)$.
+To establish this rate of convergence empirically,
+we calculated the approximation error $\hat{\varepsilon} = \max (\mathbf{K} - \widehat{\mathbf{K}})$
+for different number of features $D$.
+Then, we fitted the linear model to the obtained data using $\frac{1}{\sqrt{D}}$ as
+input features and $\hat{\varepsilon}$ as target values.
+This experiment was conducted on different datasets and different kernels.
+The results are given in Figure~\ref{fig:err_bound}.
+As it can be seen, the linear model accurately explains the data,
+therefore, confirming the derived error bounds.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/quadratures/err_bound.pdf}
+    \caption{Empirical and theoretical kernel approximation error for different
+    number of features.}
+    \label{fig:err_bound}
+\end{figure}
+
+
 
 \subsection{Classification/regression with new features}
 \label{sub:finalscore}
